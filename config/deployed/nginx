@@ -1,0 +1,17 @@
+server {
+    listen 80;
+    server_name crime.hacktyler.com;
+
+    client_max_body_size 1G;
+
+    location /site_media/ {
+        alias /mnt/media/hacktyler_crime;
+        expires 1h;
+        access_log off;		
+    }
+
+    location / {
+        uwsgi_pass unix://var/run/uwsgi/hacktyler_crime.sock;
+        include uwsgi_params;
+    }
+}
