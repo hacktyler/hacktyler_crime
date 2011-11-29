@@ -22,9 +22,10 @@ class ActiveCall(models.Model):
 
     raw_html = models.TextField()
 
-    first_seen = models.DateTimeField(auto_now=True)
-    last_modified = models.DateTimeField(auto_now=True)
-    last_seen = models.DateTimeField(auto_now=True)
+    # These fields are based on the server timestamp, not now()
+    first_seen = models.DateTimeField()
+    last_modified = models.DateTimeField()
+    last_seen = models.DateTimeField()
 
     class Meta:
         ordering = ('reported',)

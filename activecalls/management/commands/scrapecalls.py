@@ -4,6 +4,7 @@ import datetime
 import logging 
 log = logging.getLogger('activecalls.scrapecalls')
 
+from dateutil import parser
 from django.core.management.base import BaseCommand
 import lxml.etree
 import lxml.html
@@ -49,7 +50,13 @@ class Command(BaseCommand):
         # APS form nonsense
         view_state = root.cssselect('#__VIEWSTATE')[0].value
         event_validation = root.cssselect('#__EVENTVALIDATION')[0].value
-                
+
+        # Extract timestamp
+        label = root.cssselect('#lblUpdate')[0]
+        span = label.getnext()
+
+        report_time = parser.parse(span.text_content().strip())
+
         table = root.cssselect('table')[0]
         trs = table.cssselect('tr')
 
@@ -82,8 +89,8 @@ class Command(BaseCommand):
                 'incident': cells[2],
                 # Cell 3 - empty
                 'status': cells[4],
-                'reported': self.datetime_from_relative_time(cells[5]),
-                'on_scene': self.datetime_from_relative_time(cells[6]),
+                'reported': self.datetime_from_relative_time(cells[5], report_time),
+                'on_scene': self.datetime_from_relative_time(cells[6], report_time),
                 'street_number': cells[7],
                 'street_prefix': cells[8],
                 'street_name': cells[9],
@@ -92,26 +99,28 @@ class Command(BaseCommand):
                 'cross_street_suffix': cells[12],
                 # Cell 13 - empty
 
-                'raw_html': lxml.etree.tostring(tr)
+                'raw_html': lxml.etree.tostring(tr),
+
+                'first_seen': report_time,
+                'last_modified': report_time,
+                'last_seen': report_time
             }
 
             calls.append(call)
 
         return calls 
 
-    def datetime_from_relative_time(self, timestring):
+    def datetime_from_relative_time(self, timestring, report_time):
         if not timestring:
             return None
 
         hours, mins = map(int, timestring.split(':'))
 
         time_part = datetime.time(hours, mins)
-        # TODO: don't use now(), use last update time from page
-        now = datetime.datetime.now()
-        dt = datetime.datetime.combine(now.date(), time_part)
+        dt = datetime.datetime.combine(report_time.date(), time_part)
         
         # It's from yesterday
-        if time_part.hour > 20 and now.hour < 4:
+        if time_part.hour > 18 and report_time.hour < 6:
             dt = dt - datetime.timedelta(days=1)
 
         return dt
@@ -123,8 +132,7 @@ class Command(BaseCommand):
 
                 # TODO: check hash and update last_modified if necessary
 
-                # TODO: use timestamp from page not now()
-                active_call.last_seen = datetime.datetime.now()
+                active_call.last_seen = call_data['last_seen'] 
                 active_call.save()
             except ActiveCall.DoesNotExist:
                 active_call = ActiveCall.objects.create(**call_data)
