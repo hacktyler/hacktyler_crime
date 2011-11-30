@@ -77,7 +77,7 @@ class Command(BaseCommand):
                     log.info('Found %i additional pages' % (num_pages - 1))
 
                     for p in range(1, num_pages):
-                        calls.extend(self.fetch_page(p + 1, view_state, event_validation))
+                        calls.extend(self.scrape_page(p + 1, view_state, event_validation))
                     
                 continue
 
@@ -130,7 +130,16 @@ class Command(BaseCommand):
             try:
                 active_call = ActiveCall.objects.get(case_number=call_data['case_number'])
 
-                # TODO: check hash and update last_modified if necessary
+                modified = False
+
+                for attr in ['priority', 'incident', 'status', 'on_scene', 'street_number', 'street_prefix', 'street_name', 'street_suffix', 'cross_street_name', 'cross_street_suffix']:
+                    if call_data[attr] != getattr(active_call, attr):
+                        log.info('%s -- %s changed, updating') % (unicode(active_call), attr)
+                        setattr(active_call, attr, call_data[attr])
+                        modified = True
+
+                if modified:
+                    active_call.last_modified = call_data['last_modified']
 
                 active_call.last_seen = call_data['last_seen'] 
                 active_call.save()
