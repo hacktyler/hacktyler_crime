@@ -8,7 +8,7 @@ import lxml.html
 from mock import Mock
 import requests
 
-from activecalls.management.commands.scrapecalls import ACTIVE_CALLS_URL, PagerRowError, ScrapeCallsCommand
+from activecalls.management.commands.scrapecalls import ACTIVE_CALLS_URL, Command, PagerRowError
 
 def pop_last_call(mock):
     """
@@ -28,7 +28,7 @@ def pop_last_call(mock):
 
 class TestScrapeCalls(TestCase):
     def setUp(self):
-        self.command = ScrapeCallsCommand()
+        self.command = Command()
     
     def test_datetime_from_relative_time_simple(self):
         timestring = '03:00'
@@ -85,7 +85,7 @@ class TestScrapeCalls(TestCase):
         tr = lxml.html.fromstring(row_html)
         report_time = datetime(2011, 12, 4, 18, 45, 0)
 
-        self.assertRaises(PagerRowError, ScrapeCallsCommand.scrape_row, self.command, tr, report_time)
+        self.assertRaises(PagerRowError, Command.scrape_row, self.command, tr, report_time)
 
     def test_scrape_page(self):
         page1_html = open('testdata/page1.html').read()

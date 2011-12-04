@@ -8,9 +8,9 @@ class ActiveCall(models.Model):
     http://tylerpolice.com/acl/acl.aspx
     """
     case_number = models.TextField(unique=True)
-    priority_code = models.TextField()
+    priority = models.TextField()
     incident = models.TextField()
-    status_code = models.TextField()
+    status = models.TextField()
     reported = models.DateTimeField()
     on_scene = models.DateTimeField(null=True, blank=True)
     street_number = models.TextField()

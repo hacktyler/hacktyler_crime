@@ -21,7 +21,7 @@ class PagerRowError(Exception):
     def __init__(self, num_pages):
         self.num_pages = num_pages
 
-class ScrapeCallsCommand(BaseCommand):
+class Command(BaseCommand):
     """
     Scrape the Tyler PD Active Calls List.
     """
