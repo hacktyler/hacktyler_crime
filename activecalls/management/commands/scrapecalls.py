@@ -14,7 +14,14 @@ from activecalls.models import ActiveCall
 
 ACTIVE_CALLS_URL = 'http://tylerpolice.com/acl/acl.aspx'
 
-class Command(BaseCommand):
+class PagerRowError(Exception):
+    """
+    Exception encountered when a pager row is encountered.
+    """
+    def __init__(self, num_pages):
+        self.num_pages = num_pages
+
+class ScrapeCallsCommand(BaseCommand):
     """
     Scrape the Tyler PD Active Calls List.
     """
@@ -22,7 +29,9 @@ class Command(BaseCommand):
     
     def handle(self, *args, **options):
         calls = self.scrape_page(1) 
-        self.save_calls(calls)
+
+        for call_data in calls:
+            self.save_call(call_data)
 
     def scrape_page(self, page_number, view_state=None, event_validation=None):
         calls = []
@@ -67,10 +76,9 @@ class Command(BaseCommand):
             if i == 0:
                 continue
 
-            tds = tr.cssselect('td')
-
-            # Pager
-            if len(tds) < 12:
+            try:
+                call = self.scrape_row(tr, report_time)
+            except PagerRowError:
                 if page_number == 1:
                     num_pages = len(tds) - 1
 
@@ -78,37 +86,47 @@ class Command(BaseCommand):
 
                     for p in range(1, num_pages):
                         calls.extend(self.scrape_page(p + 1, view_state, event_validation))
-                    
-                continue
-
-            cells = [td.text_content().strip() for td in tds]
-
-            call = {
-                'case_number': cells[0],
-                'priority': cells[1],
-                'incident': cells[2],
-                # Cell 3 - empty
-                'status': cells[4],
-                'reported': self.datetime_from_relative_time(cells[5], report_time),
-                'on_scene': self.datetime_from_relative_time(cells[6], report_time),
-                'street_number': cells[7],
-                'street_prefix': cells[8],
-                'street_name': cells[9],
-                'street_suffix': cells[10],
-                'cross_street_name': cells[11],
-                'cross_street_suffix': cells[12],
-                # Cell 13 - empty
-
-                'raw_html': lxml.etree.tostring(tr),
-
-                'first_seen': report_time,
-                'last_modified': report_time,
-                'last_seen': report_time
-            }
 
             calls.append(call)
 
         return calls 
+
+    def scrape_row(self, tr, report_time):
+        """
+        Extracts call data from a table row.
+
+        Returns a dict of attributes
+        """
+        tds = tr.cssselect('td')
+
+        # Pager
+        if len(tds) < 12:
+            raise PagerRowError(len(tds) - 1) 
+
+        cells = [td.text_content().strip() for td in tds]
+
+        return {
+            'case_number': cells[0],
+            'priority': cells[1],
+            'incident': cells[2],
+            # Cell 3 - empty
+            'status': cells[4],
+            'reported': self.datetime_from_relative_time(cells[5], report_time),
+            'on_scene': self.datetime_from_relative_time(cells[6], report_time),
+            'street_number': cells[7],
+            'street_prefix': cells[8],
+            'street_name': cells[9],
+            'street_suffix': cells[10],
+            'cross_street_name': cells[11],
+            'cross_street_suffix': cells[12],
+            # Cell 13 - empty
+
+            'raw_html': lxml.etree.tostring(tr),
+
+            'first_seen': report_time,
+            'last_modified': report_time,
+            'last_seen': report_time
+        }
 
     def datetime_from_relative_time(self, timestring, report_time):
         if not timestring:
@@ -125,26 +143,25 @@ class Command(BaseCommand):
 
         return dt
 
-    def save_calls(self, calls):
-        for call_data in calls:
-            try:
-                active_call = ActiveCall.objects.get(case_number=call_data['case_number'])
+    def save_call(self, call_data):
+        try:
+            active_call = ActiveCall.objects.get(case_number=call_data['case_number'])
 
-                modified = False
+            modified = False
 
-                for attr in ['priority', 'incident', 'status', 'on_scene', 'street_number', 'street_prefix', 'street_name', 'street_suffix', 'cross_street_name', 'cross_street_suffix']:
-                    if call_data[attr] != getattr(active_call, attr):
-                        log.info('%s -- %s changed, updating') % (unicode(active_call), attr)
-                        setattr(active_call, attr, call_data[attr])
-                        modified = True
+            for attr in ['priority', 'incident', 'status', 'on_scene', 'street_number', 'street_prefix', 'street_name', 'street_suffix', 'cross_street_name', 'cross_street_suffix']:
+                if call_data[attr] != getattr(active_call, attr):
+                    log.info('%s -- %s changed, updating') % (unicode(active_call), attr)
+                    setattr(active_call, attr, call_data[attr])
+                    modified = True
 
-                if modified:
-                    active_call.last_modified = call_data['last_modified']
+            if modified:
+                active_call.last_modified = call_data['last_modified']
 
-                active_call.last_seen = call_data['last_seen'] 
-                active_call.save()
-            except ActiveCall.DoesNotExist:
-                active_call = ActiveCall.objects.create(**call_data)
+            active_call.last_seen = call_data['last_seen'] 
+            active_call.save()
+        except ActiveCall.DoesNotExist:
+            active_call = ActiveCall.objects.create(**call_data)
 
-                log.debug('Saved new active call: %s' % unicode(active_call))
+            log.debug('Saved new active call: %s' % unicode(active_call))
 

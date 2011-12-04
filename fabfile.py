@@ -197,9 +197,9 @@ def local_reset_database():
     """
     with settings(warn_only=True):
         local('dropdb %(project_name)s' % env)
-        local('dropuser %(project_name)s' % env)
+        #local('dropuser %(project_name)s' % env)
 
-    local('echo "CREATE USER %(project_name)s WITH PASSWORD \'%(database_password)s\';" | psql postgres' % env)
+    #local('echo "CREATE USER %(project_name)s WITH PASSWORD \'%(database_password)s\';" | psql postgres' % env)
     local('createdb -O %(project_name)s %(project_name)s -T template_postgis' % env)
     local('python manage.py syncdb --noinput' % env) 
 
