@@ -78,14 +78,14 @@ class ScrapeCallsCommand(BaseCommand):
 
             try:
                 call = self.scrape_row(tr, report_time)
-            except PagerRowError:
+            except PagerRowError, e:
                 if page_number == 1:
-                    num_pages = len(tds) - 1
+                    log.info('Found %i additional pages' % (e.num_pages - 1))
 
-                    log.info('Found %i additional pages' % (num_pages - 1))
-
-                    for p in range(1, num_pages):
+                    for p in range(1, e.num_pages):
                         calls.extend(self.scrape_page(p + 1, view_state, event_validation))
+
+                continue
 
             calls.append(call)
 
