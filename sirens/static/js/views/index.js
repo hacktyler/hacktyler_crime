@@ -26,6 +26,14 @@ Sirens.views.Index = Backbone.View.extend({
             });
             
             this.map.addLayer(tiles);
+
+            geojson = new L.GeoJSON();
+
+            this.active_calls.each(function(c) {
+                geojson.addGeoJSON(c.get("point"));
+            });
+
+            this.map.addLayer(geojson);
         }
 
         this.map.panTo(center);
