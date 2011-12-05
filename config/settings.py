@@ -90,7 +90,8 @@ INSTALLED_APPS = (
 
     'compressor',
 
-    'activecalls'
+    'activecalls',
+    'sirens'
 )
 
 # Email
