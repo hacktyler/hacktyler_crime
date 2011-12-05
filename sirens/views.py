@@ -24,7 +24,7 @@ def index(request):
     return render_to_response('index.html', {
         'STATIC_URL': settings.STATIC_URL,
         'bootstrap_data': serializer.to_json({
-            'calls': calls_bootstrap
+            'active_calls': calls_bootstrap
         })
     })
 
