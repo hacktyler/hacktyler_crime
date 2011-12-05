@@ -1,1 +1,60 @@
-Test!!!
+<!DOCTYPE html>
+
+{% load compress %}
+
+<html>
+<head>
+    <title>Tyler Sirens</title>
+    {% compress css %}
+    <link rel="stylesheet" href="{{ STATIC_URL }}css/reset.css" type="text/css" charset="utf-8"/>
+    <link rel="stylesheet" href="{{ STATIC_URL }}css/bootstrap.css" type="text/css" charset="utf-8" />
+    <link rel="stylesheet" href="{{ STATIC_URL }}css/sirens.css" type="text/css" charset="utf-8"/>
+    {% endcompress %}
+</head>
+<body>
+    <div class="topbar">
+        <div class="topbar-inner">
+            <div class="container">
+                <h3><a href="#">Tyler Sirens</a></h3>
+                <ul class="nav">
+                </ul>
+            </div>
+        </div>
+   </div>
+
+    <div class="container">
+        <div id="content" class="content">
+            Stuff goes here.
+        </div>
+    </div>
+
+    {% compress js %}
+    <script type="text/javascript" src="{{ STATIC_URL }}js/lib/jquery-1.6.4.js"></script>
+    <script type="text/javascript" src="{{ STATIC_URL }}js/lib/underscore.js"></script>
+    <script type="text/javascript" src="{{ STATIC_URL }}js/lib/backbone.js"></script>
+    <script type="text/javascript" src="{{ STATIC_URL }}js/lib/backbone-tastypie.js"></script>
+    <script type="text/javascript" src="{{ STATIC_URL }}js/lib/json2.js"></script>
+    <script type="text/javascript" src="{{ STATIC_URL }}js/lib/moment.js"></script>
+    <script type="text/javascript" src="{{ STATIC_URL }}js/application.js"></script>
+    {% endcompress %}
+    
+    <!--<script type="text/javascript" src="templates.js"></script>-->
+
+    {% compress js %}
+    <script type="text/javascript" src="{{ STATIC_URL }}js/models/active_calls.js"></script>
+    <!--<script type="text/javascript" src="{{ STATIC_URL }}js/routers/index.js"></script>
+    <script type="text/javascript" src="{{ STATIC_URL }}js/views/root.js"></script>-->
+    {% endcompress %}
+
+    <script type="text/javascript">
+        $(function() {
+            Sirens.bootstrap = {{ bootstrap_data|safe }}; 
+
+            //window.Root = new PANDA.views.Root();
+            //Redd.start_routing();
+        })
+    </script>
+</body>
+</html>
+
+

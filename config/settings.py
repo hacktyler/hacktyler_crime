@@ -45,7 +45,7 @@ STATICFILES_FINDERS = (
 )
 
 # Uploads 
-MEDIA_ROOT = os.path.join(SITE_ROOT, 'media')
+MEDIA_ROOT = '/tmp/sirens'
 
 # Make this unique, and don't share it with anybody.
 SECRET_KEY = '+ei7-2)76sh$$dy^5h4zmkglw#ey1d3f0cj^$r+3zo!wq9j+_*'
@@ -86,6 +86,7 @@ INSTALLED_APPS = (
     'django.contrib.admin',
     'django.contrib.humanize',
     'django.contrib.sitemaps',
+    'django.contrib.staticfiles',
     'django.contrib.gis',
 
     'compressor',
