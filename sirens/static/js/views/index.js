@@ -16,6 +16,7 @@ Sirens.views.Index = Backbone.View.extend({
 
     pusher: null,
     channel: null,
+    member_count: 0,
 
     initialize: function() {
         _.bindAll(this, "render", "add_marker", "update_marker");
@@ -64,7 +65,22 @@ Sirens.views.Index = Backbone.View.extend({
     init_socket: function() {
         this.pusher = new Pusher("d20fddb74c58823cd05d");
         this.channel = this.pusher.subscribe("active_calls");
+
+        this.channel.bind("pusher:subscription_succeeded", _.bind(function(members) {
+            this.member_count = members.count;
+            console.log(this.member_count);
+        }, this));
+       
+        this.channel.bind("pusher:member_added", _.bind(function(member) {
+            this.member_count += 1;
+            console.log(this.member_count);
+        }, this));
         
+        this.channel.bind("pusher:member_added", _.bind(function(member) {
+            this.member_count -= 1;
+            console.log(this.member_count);
+        }, this));
+
         this.channel.bind("new_active_call", _.bind(function(data) {
             active_call = new Sirens.models.ActiveCall(data);
             this.active_calls.add(active_call);
