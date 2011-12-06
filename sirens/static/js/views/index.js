@@ -29,8 +29,12 @@ Sirens.views.Index = Backbone.View.extend({
 
             geojson = new L.GeoJSON();
 
+            geojson.on("featureparse", function (e) {
+                e.layer.bindPopup(e.properties.incident);
+            });
+
             this.active_calls.each(function(c) {
-                geojson.addGeoJSON(c.get("point"));
+                geojson.addGeoJSON({ type: "Feature", geometry: c.get("point"), properties: c.toJSON() });
             });
 
             this.map.addLayer(geojson);
