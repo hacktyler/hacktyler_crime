@@ -1,2 +1,6 @@
 #content { margin-top: 40px; }
 #map { position: absolute; height: 100%; }
+
+.marker-popup h3 { font-size: larger; line-height: 24px; }
+.marker-popup p { margin: 6px 0; } 
+.marker-popup .case-number { font-size: smaller; text-align: right; }

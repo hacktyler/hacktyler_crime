@@ -3,12 +3,15 @@ Sirens.views.Index = Backbone.View.extend({
 
     map: null,
     active_calls_features: null,
+    marker_template: null,
 
     pusher: null,
     channel: null,
 
     initialize: function() {
         _.bindAll(this, "render", "add_marker", "update_marker");
+
+        this.marker_template = _.template($("#marker-popup-template").html());
 
         this.init_active_calls();
         this.init_map();
@@ -76,9 +79,9 @@ Sirens.views.Index = Backbone.View.extend({
     add_marker: function(active_call) {
         active_call.feature = new L.GeoJSON();
 
-        active_call.feature.on("featureparse", function (e) {
-            e.layer.bindPopup(e.properties.incident);
-        });
+        active_call.feature.on("featureparse", _.bind(function(e) {
+            e.layer.bindPopup(this.marker_template(e.properties));
+        }, this));
 
         active_call.feature.addGeoJSON({ type: "Feature", geometry: active_call.get("point"), properties: active_call.toJSON() });
 
