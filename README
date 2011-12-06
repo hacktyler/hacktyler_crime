@@ -1,2 +1,12 @@
 hacktyler_crime
+===============
 
+Real-time crime mapping for Tyler, TX.
+
+This application depends on http://pusher.com/
+
+To configure, create local_settings.py in the root directory with the following configuration::
+
+    PUSHER_APP_ID = 'foo'
+    PUSHER_KEY = 'bar'
+    PUSHER_SECRET = 'baz'

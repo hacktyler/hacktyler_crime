@@ -5,12 +5,16 @@ import logging
 log = logging.getLogger('activecalls.scrapecalls')
 
 from dateutil import parser
+from django.conf import settings
 from django.core.management.base import BaseCommand
+from django.core.serializers.json import DjangoJSONEncoder
 import lxml.etree
 import lxml.html
+import pusher
 import requests
 
 from activecalls.models import ActiveCall
+from activecalls.resources import ActiveCallResource
 
 ACTIVE_CALLS_URL = 'http://tylerpolice.com/acl/acl.aspx'
 
@@ -151,7 +155,7 @@ class Command(BaseCommand):
 
             for attr in ['priority', 'incident', 'status', 'on_scene', 'street_number', 'street_prefix', 'street_name', 'street_suffix', 'cross_street_name', 'cross_street_suffix']:
                 if call_data[attr] != getattr(active_call, attr):
-                    log.info('%s -- %s changed, updating') % (unicode(active_call), attr)
+                    log.info('%s -- %s changed, updating' % (unicode(active_call), attr))
                     setattr(active_call, attr, call_data[attr])
                     modified = True
 
@@ -160,8 +164,27 @@ class Command(BaseCommand):
 
             active_call.last_seen = call_data['last_seen'] 
             active_call.save()
+
+            if modified:
+                self.push_notification('changed_active_call', active_call)
         except ActiveCall.DoesNotExist:
             active_call = ActiveCall.objects.create(**call_data)
 
+            self.push_notification('new_active_call', active_call)
+
             log.debug('Saved new active call: %s' % unicode(active_call))
+
+    def push_notification(self, event, active_call):
+        p = pusher.Pusher(
+            app_id=settings.PUSHER_APP_ID,
+            key=settings.PUSHER_KEY,
+            secret=settings.PUSHER_SECRET,
+            encoder=DjangoJSONEncoder)
+
+        resource = ActiveCallResource()
+
+        bundle = resource.build_bundle(obj=active_call)
+        bundle = resource.full_dehydrate(bundle)
+
+        p['active_calls'].trigger(event, bundle.data)
 
