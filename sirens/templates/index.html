@@ -61,8 +61,16 @@
             </p>
 
             <p>
-            <% if (on_scene) { %>
-                Police arrived at <%= moment(on_scene, "YYYY-MM-DDTHH:mm:ss").format("h:mm a") %>.
+            <% if (status == "O") { %>
+                Police arrived on scene at <%= moment(on_scene, "YYYY-MM-DDTHH:mm:ss").format("h:mm a") %>.
+            <% } else if (status == "D") { %>
+                Police have been informed, but are not yet en route.
+            <% } else if (status == "Q") { %>
+                Police are responding to other reports prior to this one. 
+            <% } else if (status == "H") { %>
+                Police have not yet been dispatched.
+            <% } else if (status == "E") { %>
+                Police are en route.
             <% } else { %>
                 Police have not yet arrived.
             <% } %>
