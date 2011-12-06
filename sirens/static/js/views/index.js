@@ -5,6 +5,15 @@ Sirens.views.Index = Backbone.View.extend({
     active_calls_features: null,
     marker_template: null,
 
+    marker_style: {
+        radius: 8,
+        fillColor: "#ff7800",
+        color: "#000",
+        weight: 1,
+        opacity: 1,
+        fillOpacity: 0.8
+    },
+
     pusher: null,
     channel: null,
 
@@ -77,7 +86,11 @@ Sirens.views.Index = Backbone.View.extend({
     },
 
     add_marker: function(active_call) {
-        active_call.feature = new L.GeoJSON();
+        active_call.feature = new L.GeoJSON(null, {
+            pointToLayer: _.bind(function (latlng) {
+                return new L.CircleMarker(latlng, this.marker_style);
+            }, this)
+        });
 
         active_call.feature.on("featureparse", _.bind(function(e) {
             e.layer.bindPopup(this.marker_template(e.properties));
