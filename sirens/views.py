@@ -51,7 +51,7 @@ def pusher_user_auth(request):
 
     channel = p[channel_name]
 
-    response = json.dumps(channel.authenticate(socket_id, {}), cls=DjangoJSONEncoder)
+    response = json.dumps(channel.authenticate(socket_id, { 'key': 'value' }), cls=DjangoJSONEncoder)
 
     return HttpResponse(response, status=200, content_type='application/json')
 
