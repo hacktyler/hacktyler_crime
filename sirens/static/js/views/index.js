@@ -2,7 +2,7 @@ Sirens.views.Index = Backbone.View.extend({
     active_calls: null,
 
     map: null,
-    active_calls_features: null,
+    active_calls_layers: null,
     marker_template: null,
 
     marker_style: {
@@ -44,7 +44,6 @@ Sirens.views.Index = Backbone.View.extend({
 
         this.map = new L.Map('map', {
             zoom: zoom,
-            center: center,
         });
 
         tiles = new L.TileLayer("http://{s}.google.com/vt/lyrs=m@155000000&hl=en&x={x}&y={y}&z={z}", {
@@ -55,30 +54,30 @@ Sirens.views.Index = Backbone.View.extend({
         
         this.map.addLayer(tiles);
 
-        this.active_calls_features = new L.LayerGroup();
+        this.active_calls_layers = new L.LayerGroup();
 
         this.active_calls.each(this.add_marker);
 
-        this.map.addLayer(this.active_calls_features);
+        this.map.addLayer(this.active_calls_layers);
     },
 
     init_socket: function() {
         this.pusher = new Pusher("d20fddb74c58823cd05d");
-        this.channel = this.pusher.subscribe("active_calls");
+        this.channel = this.pusher.subscribe("active-calls");
 
         this.channel.bind("pusher:subscription_succeeded", _.bind(function(members) {
             this.member_count = members.count;
-            console.log(this.member_count);
+            this.update_member_count();
         }, this));
        
         this.channel.bind("pusher:member_added", _.bind(function(member) {
             this.member_count += 1;
-            console.log(this.member_count);
+            this.update_member_count();
         }, this));
         
         this.channel.bind("pusher:member_added", _.bind(function(member) {
             this.member_count -= 1;
-            console.log(this.member_count);
+            this.update_member_count();
         }, this));
 
         this.channel.bind("new_active_call", _.bind(function(data) {
@@ -102,27 +101,32 @@ Sirens.views.Index = Backbone.View.extend({
     },
 
     add_marker: function(active_call) {
-        active_call.feature = new L.GeoJSON(null, {
+        active_call.layer = new L.GeoJSON(null, {
             pointToLayer: _.bind(function (latlng) {
-                return new L.CircleMarker(latlng, this.marker_style);
+                return new L.CircleMarker(latlng);
             }, this)
         });
 
-        active_call.feature.on("featureparse", _.bind(function(e) {
+        active_call.layer.on("featureparse", _.bind(function(e) {
             e.layer.bindPopup(this.marker_template(e.properties));
+            e.layer.setStyle(this.marker_style);
         }, this));
 
-        active_call.feature.addGeoJSON({ type: "Feature", geometry: active_call.get("point"), properties: active_call.toJSON() });
+        active_call.layer.addGeoJSON({ type: "Feature", geometry: active_call.get("point"), properties: active_call.toJSON() });
 
-        this.active_calls_features.addLayer(active_call.feature); 
+        this.active_calls_layers.addLayer(active_call.layer); 
 
         ll = new L.LatLng(active_call.get("point").coordinates[1], active_call.get("point").coordinates[0]);
         this.map.setView(ll, 15);
     },
 
     update_marker: function(active_call) {
-        this.active_calls_features.removeLayer(active_call.feature); 
+        this.active_calls_layers.removeLayer(active_call.layer); 
         this.add_marker(active_call);
+    },
+
+    update_member_count: function() {
+        $("#member-count").text(this.member_count);
     }
 });
 

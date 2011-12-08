@@ -17,8 +17,13 @@
     <div class="topbar">
         <div class="topbar-inner">
             <div class="container">
-                <h3><a href="#">Tyler Sirens</a></h3>
+                <h3><a data-controls-modal="welcome-modal" data-keyboard="true" data-backdrop="true">Tyler Sirens</a></h3>
                 <ul class="nav">
+                    <li><a href="javascript:alert('TODO'); return false;">Find a location</a></li>
+                </ul>
+                <ul class="nav secondary-nav">
+                    <li><a href="#">Current users: <span id="member-count" class="count label notice">0</span></a></li>
+                    <li><a data-controls-modal="about-modal" data-keyboard="true" data-backdrop="true">About</a></li>
                 </ul>
             </div>
         </div>
@@ -33,11 +38,47 @@
         </div>
     </div>
 
+    <div id="welcome-modal" class="modal hide fade in">
+        <div class="modal-header">
+            <a href="#" class="close">&times;</a>
+            <h3>Welcome to Tyler Sirens</h3>
+        </div>
+        <div class="modal-body">
+            <p>This site uses real-time data made public by <strong>Tyler Police Department</strong> to create a visual police blotter for the city. Want to know what those sirens you heard were all about? Check the map!</p>
+            
+            <p>But, of course, there are limits to this system. To learn more about what isn't included, or about how this site was made, click the <strong>About</strong> button at the top of the main window.</p>
+
+            <p>Thanks for visiting!</p>
+
+            <p>
+                <strong>Christopher Groskopf</strong><br />
+                Hack Tyler
+            </p>
+        </div>
+        <div class="modal-footer">
+            <input type="button" class="btn primary modal-close" value="Close" />
+        </div> 
+    </div>
+
+    <div id="about-modal" class="modal hide fade in">
+        <div class="modal-header">
+            <a href="#" class="close">&times;</a>
+            <h3>About this site</h3>
+        </div>
+        <div class="modal-body">
+            TODO
+        </div>
+        <div class="modal-footer">
+            <input type="button" class="btn primary modal-close" value="Close" />
+        </div> 
+    </div>
+
     {% compress js %}
     <script type="text/javascript" src="{{ STATIC_URL }}js/lib/jquery-1.6.4.js"></script>
     <script type="text/javascript" src="{{ STATIC_URL }}js/lib/underscore.js"></script>
     <script type="text/javascript" src="{{ STATIC_URL }}js/lib/backbone.js"></script>
     <script type="text/javascript" src="{{ STATIC_URL }}js/lib/backbone-tastypie.js"></script>
+    <script type="text/javascript" src="{{ STATIC_URL }}js/lib/bootstrap-modal.js"></script>
     <script type="text/javascript" src="{{ STATIC_URL }}js/lib/json2.js"></script>
     <script type="text/javascript" src="{{ STATIC_URL }}js/lib/moment.js"></script>
     <script type="text/javascript" src="{{ STATIC_URL }}js/lib/leaflet.js"></script>
@@ -86,6 +127,12 @@
 
             window.Index = new Sirens.routers.Index();
             Index.start_routing();
+
+            $('#welcome-modal').modal({
+                backdrop: true,
+                keyboard: true,
+                show: true
+            });
         })
     </script>
 </body>
