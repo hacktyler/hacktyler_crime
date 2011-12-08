@@ -11,4 +11,4 @@ mock==0.7.2
 geopy==0.94.1
 git+https://github.com/toastdriven/django-tastypie.git#egg=django-tastypie
 BeautifulSoup==3.2.0
-pusher==0.5
+-e git+https://github.com/onyxfish/pusher_client_python.git#egg=pusher

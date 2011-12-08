@@ -9,10 +9,10 @@ TEMPLATE_DEBUG = DEBUG
 DATABASES['default']['PORT'] = '5433'
 
 # Static media
-STATIC_ROOT = '/mnt/media'
+STATIC_ROOT = '/mnt/media/hacktyler_crime'
 
 # Uploads 
-MEDIA_ROOT = '/mnt/uploads' 
+MEDIA_ROOT = '/mnt/uploads/hacktyler_crime' 
 
 # Caching
 CACHES = {

@@ -63,7 +63,7 @@ Sirens.views.Index = Backbone.View.extend({
 
     init_socket: function() {
         this.pusher = new Pusher("d20fddb74c58823cd05d");
-        this.channel = this.pusher.subscribe("active-calls");
+        this.channel = this.pusher.subscribe("presence-active-calls");
 
         this.channel.bind("pusher:subscription_succeeded", _.bind(function(members) {
             this.member_count = members.count;
