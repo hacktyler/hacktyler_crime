@@ -6,6 +6,7 @@ from django.conf import settings
 from django.core.serializers.json import DjangoJSONEncoder
 from django.http import HttpResponse
 from django.shortcuts import render_to_response
+from django.views.decorators.csrf import csrf_exempt
 import pusher
 from tastypie.serializers import Serializer
 
@@ -33,6 +34,7 @@ def index(request):
         })
     })
 
+@csrf_exempt
 def pusher_user_auth(request):
     """
     Faux-authentication of users, for the purposes of counting them.
