@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 import json
+from uuid import uuid4
 
 from django.conf import settings
 from django.core.serializers.json import DjangoJSONEncoder
@@ -51,7 +52,7 @@ def pusher_user_auth(request):
 
     channel = p[channel_name]
 
-    response = json.dumps(channel.authenticate(socket_id, { 'key': 'value' }), cls=DjangoJSONEncoder)
+    response = json.dumps(channel.authenticate(socket_id, { 'user_id': unicode(uuid4()) }), cls=DjangoJSONEncoder)
 
     return HttpResponse(response, status=200, content_type='application/json')
 
