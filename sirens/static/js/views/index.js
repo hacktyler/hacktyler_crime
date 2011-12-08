@@ -75,7 +75,7 @@ Sirens.views.Index = Backbone.View.extend({
             this.update_member_count();
         }, this));
         
-        this.channel.bind("pusher:member_added", _.bind(function(member) {
+        this.channel.bind("pusher:member_removed", _.bind(function(member) {
             this.member_count -= 1;
             this.update_member_count();
         }, this));
