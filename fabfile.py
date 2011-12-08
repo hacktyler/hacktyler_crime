@@ -14,6 +14,7 @@ env.repo_path = '%(path)s' % env
 env.server_config_path = '/etc/nginx/sites-enabled/%(project_name)s' % env
 env.python = 'python2.7'
 env.repository_url = "git@github.com:hacktyler/hacktyler_crime.git"
+env.user = 'ubuntu'
 env.hosts = ['hasufel.hacktyler.com']
 
 """
