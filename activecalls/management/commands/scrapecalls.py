@@ -155,7 +155,7 @@ class Command(BaseCommand):
 
             for attr in ['priority', 'incident', 'status', 'on_scene', 'street_number', 'street_prefix', 'street_name', 'street_suffix', 'cross_street_name', 'cross_street_suffix']:
                 if call_data[attr] != getattr(active_call, attr):
-                    log.info('%s -- %s changed, updating' % (unicode(active_call), attr))
+                    log.info('%s -- %s changed, "%s" became "%s"' % (unicode(active_call), attr, getattr(active_call, attr), call_data[attr]))
                     setattr(active_call, attr, call_data[attr])
                     modified = True
 
