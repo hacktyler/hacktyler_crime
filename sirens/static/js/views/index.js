@@ -19,7 +19,7 @@ Sirens.views.Index = Backbone.View.extend({
     member_count: 0,
 
     initialize: function() {
-        _.bindAll(this, "render", "show_popover", "add_marker", "update_marker");
+        _.bindAll(this, "render", "show_popover", "pan_to", "add_marker", "update_marker");
 
         this.marker_template = _.template($("#marker-popover-template").html());
 
@@ -110,11 +110,15 @@ Sirens.views.Index = Backbone.View.extend({
         active_call.layer.on("featureparse", _.bind(function(e) {
             e.layer.setStyle(this.marker_style);
 
-            (function(properties, mouseover_handler) {
+            (function(properties, mouseover_handler, click_handler) {
                 e.layer.on("mouseover", function (e) { 
                     mouseover_handler(properties);
                 });
-            })(e.properties, this.show_popover);
+
+                e.layer.on("click", function(e) {
+                    click_handler(properties);
+                });
+            })(e.properties, this.show_popover, this.pan_to);
         }, this));
 
         active_call.layer.addGeoJSON({ type: "Feature", geometry: active_call.get("point"), properties: active_call.toJSON() });
@@ -157,6 +161,13 @@ Sirens.views.Index = Backbone.View.extend({
         }).appendTo(inner);
 
         popup.appendTo("#map");
+    },
+
+    pan_to: function(properties) {
+        ll = new L.LatLng(properties.point.coordinates[1], properties.point.coordinates[0]);
+
+        this.map.setView(ll, 15);
+        this.show_popover(properties);
     },
 
     update_marker: function(active_call) {
