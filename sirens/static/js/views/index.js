@@ -3,7 +3,7 @@ Sirens.views.Index = Backbone.View.extend({
 
     map: null,
     active_calls_layers: null,
-    marker_template: null,
+    popover_template: null,
 
     marker_style: {
         radius: 8,
@@ -19,9 +19,9 @@ Sirens.views.Index = Backbone.View.extend({
     member_count: 0,
 
     initialize: function() {
-        _.bindAll(this, "render", "add_marker", "update_marker");
+        _.bindAll(this, "render", "show_popover", "add_marker", "update_marker");
 
-        this.marker_template = _.template($("#marker-popup-template").html());
+        this.marker_template = _.template($("#marker-popover-template").html());
 
         this.init_active_calls();
         this.init_map();
@@ -108,8 +108,13 @@ Sirens.views.Index = Backbone.View.extend({
         });
 
         active_call.layer.on("featureparse", _.bind(function(e) {
-            e.layer.bindPopup(this.marker_template(e.properties));
             e.layer.setStyle(this.marker_style);
+
+            (function(properties, mouseover_handler) {
+                e.layer.on("mouseover", function (e) { 
+                    mouseover_handler(properties);
+                });
+            })(e.properties, this.show_popover);
         }, this));
 
         active_call.layer.addGeoJSON({ type: "Feature", geometry: active_call.get("point"), properties: active_call.toJSON() });
@@ -117,7 +122,41 @@ Sirens.views.Index = Backbone.View.extend({
         this.active_calls_layers.addLayer(active_call.layer); 
 
         ll = new L.LatLng(active_call.get("point").coordinates[1], active_call.get("point").coordinates[0]);
+
         this.map.setView(ll, 15);
+        this.show_popover(active_call.toJSON());
+    },
+
+    show_popover: function(properties) {
+        // Clear previous popover
+        $("#marker-popover").remove();
+        
+        var popup = $("<div>", {
+            id: "marker-popover",
+            class: "popover",
+            css: {
+                top: "15px",
+                right: "15px",
+                left: "auto",
+                display: "block"
+            }
+        });
+
+        var inner = $("<div>", {
+            class: "inner"
+        }).appendTo(popup);
+
+        var header = $("<div>", {
+            html: "<h4>" + properties.incident + "</h4>",
+            class: "title"
+        }).appendTo(inner);
+
+        var body = $("<div>", {
+            html: $(this.marker_template(properties)),
+            class: "content"
+        }).appendTo(inner);
+
+        popup.appendTo("#map");
     },
 
     update_marker: function(active_call) {

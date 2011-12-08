@@ -22,7 +22,7 @@
                     <li><a href="javascript:alert('TODO'); return false;">Find a location</a></li>
                 </ul>
                 <ul class="nav secondary-nav">
-                    <li><a href="#">Current users: <span id="member-count" class="count label notice">0</span></a></li>
+                    <li><a id="test-anchor" href="#">Current users: <span id="member-count" class="count label notice">0</span></a></li>
                     <li><a data-controls-modal="about-modal" data-keyboard="true" data-backdrop="true">About</a></li>
                 </ul>
             </div>
@@ -79,6 +79,8 @@
     <script type="text/javascript" src="{{ STATIC_URL }}js/lib/backbone.js"></script>
     <script type="text/javascript" src="{{ STATIC_URL }}js/lib/backbone-tastypie.js"></script>
     <script type="text/javascript" src="{{ STATIC_URL }}js/lib/bootstrap-modal.js"></script>
+    <script type="text/javascript" src="{{ STATIC_URL }}js/lib/bootstrap-twipsy.js"></script>
+    <script type="text/javascript" src="{{ STATIC_URL }}js/lib/bootstrap-popover.js"></script>
     <script type="text/javascript" src="{{ STATIC_URL }}js/lib/json2.js"></script>
     <script type="text/javascript" src="{{ STATIC_URL }}js/lib/moment.js"></script>
     <script type="text/javascript" src="{{ STATIC_URL }}js/lib/leaflet.js"></script>
@@ -94,31 +96,28 @@
     <script type="text/javascript" src="{{ STATIC_URL }}js/routers/index.js"></script>
     {% endcompress %}
 
-    <script id="marker-popup-template" type="text/x-template">
-        <div class="marker-popup">
-            <h3><%= incident %></h3>
-            <p>
-            Reported at <strong><%= moment(reported, "YYYY-MM-DDTHH:mm:ss").format("h:mm a") %></strong> near<br /> <strong><%= street_prefix %> <%= street_name %> <%= street_suffix %></strong> and <strong><%= cross_street_name %> <%= cross_street_suffix %></strong>.
-            </p>
+    <script id="marker-popover-template" type="text/x-template">
+        <p>
+        Reported at <strong><%= moment(reported, "YYYY-MM-DDTHH:mm:ss").format("h:mm a") %></strong> near<br /> <strong><%= street_prefix %> <%= street_name %> <%= street_suffix %></strong> and <strong><%= cross_street_name %> <%= cross_street_suffix %></strong>.
+        </p>
 
-            <p>
-            <% if (status == "O") { %>
-                Police arrived on scene at <%= moment(on_scene, "YYYY-MM-DDTHH:mm:ss").format("h:mm a") %>.
-            <% } else if (status == "D") { %>
-                Police have been informed, but are not yet en route.
-            <% } else if (status == "Q") { %>
-                Police are responding to other reports prior to this one. 
-            <% } else if (status == "H") { %>
-                Police have not yet been dispatched.
-            <% } else if (status == "E") { %>
-                Police are en route.
-            <% } else { %>
-                Police have not yet arrived.
-            <% } %>
-            </p>
+        <p>
+        <% if (status == "O") { %>
+            Police arrived on scene at <%= moment(on_scene, "YYYY-MM-DDTHH:mm:ss").format("h:mm a") %>.
+        <% } else if (status == "D") { %>
+            Police have been informed, but are not yet en route.
+        <% } else if (status == "Q") { %>
+            Police are responding to other reports prior to this one. 
+        <% } else if (status == "H") { %>
+            Police have not yet been dispatched.
+        <% } else if (status == "E") { %>
+            Police are en route.
+        <% } else { %>
+            Police have not yet arrived.
+        <% } %>
+        </p>
 
-            <p class="case-number">Case #<%= case_number %></p>
-        </div>
+        <div class="case-number">Case #<%= case_number %></div>
     </script>
 
     <script type="text/javascript">
@@ -131,7 +130,7 @@
             $('#welcome-modal').modal({
                 backdrop: true,
                 keyboard: true,
-                show: true
+                //show: true
             });
         })
     </script>
