@@ -6,11 +6,11 @@
 <head>
     <title>Tyler Sirens</title>
     {% compress css %}
-    <link rel="stylesheet" href="{{ STATIC_URL }}css/reset.css" type="text/css" charset="utf-8"/>
-    <link rel="stylesheet" href="{{ STATIC_URL }}css/bootstrap.css" type="text/css" charset="utf-8" />
-    <link rel="stylesheet" href="{{ STATIC_URL }}css/leaflet.css" type="text/css" charset="utf-8" />
-    <link rel="stylesheet" href="{{ STATIC_URL }}css/leaflet.ie.css" type="text/css" charset="utf-8" />
-    <link rel="stylesheet" href="{{ STATIC_URL }}css/sirens.css" type="text/css" charset="utf-8"/>
+    <link rel="stylesheet" href="{{ settings.STATIC_URL }}css/reset.css" type="text/css" charset="utf-8"/>
+    <link rel="stylesheet" href="{{ settings.STATIC_URL }}css/bootstrap.css" type="text/css" charset="utf-8" />
+    <link rel="stylesheet" href="{{ settings.STATIC_URL }}css/leaflet.css" type="text/css" charset="utf-8" />
+    <link rel="stylesheet" href="{{ settings.STATIC_URL }}css/leaflet.ie.css" type="text/css" charset="utf-8" />
+    <link rel="stylesheet" href="{{ settings.STATIC_URL }}css/sirens.css" type="text/css" charset="utf-8"/>
     {% endcompress %}
 </head>
 <body>
@@ -36,7 +36,8 @@
                     </li>
                 </ul>
                 <ul class="nav secondary-nav">
-                    <li><a id="test-anchor" href="#">Current users: <span id="member-count" class="count label notice">0</span></a></li>
+                    <li><a href="#">Active calls since <span id="start-time"></span>: <span id="active-call-count" class="count label notice">0</span></a></li>
+                    <li><a href="#">Current users: <span id="member-count" class="count label notice">0</span></a></li>
                     <li><a data-controls-modal="about-modal" data-keyboard="true" data-backdrop="true">About</a></li>
                 </ul>
             </div>
@@ -88,21 +89,21 @@
     </div>
 
     {% compress js %}
-    <script type="text/javascript" src="{{ STATIC_URL }}js/lib/jquery-1.6.4.js"></script>
-    <script type="text/javascript" src="{{ STATIC_URL }}js/lib/underscore.js"></script>
-    <script type="text/javascript" src="{{ STATIC_URL }}js/lib/backbone.js"></script>
-    <script type="text/javascript" src="{{ STATIC_URL }}js/lib/backbone-tastypie.js"></script>
-    <script type="text/javascript" src="{{ STATIC_URL }}js/lib/bootstrap-modal.js"></script>
-    <script type="text/javascript" src="{{ STATIC_URL }}js/lib/bootstrap-dropdown.js"></script>
-    <script type="text/javascript" src="{{ STATIC_URL }}js/lib/json2.js"></script>
-    <script type="text/javascript" src="{{ STATIC_URL }}js/lib/moment.js"></script>
-    <script type="text/javascript" src="{{ STATIC_URL }}js/lib/leaflet.js"></script>
-    <script type="text/javascript" src="{{ STATIC_URL }}js/lib/pusher.min.js"></script>
-    <script type="text/javascript" src="{{ STATIC_URL }}js/application.js"></script>
+    <script type="text/javascript" src="{{ settings.STATIC_URL }}js/lib/jquery-1.6.4.js"></script>
+    <script type="text/javascript" src="{{ settings.STATIC_URL }}js/lib/underscore.js"></script>
+    <script type="text/javascript" src="{{ settings.STATIC_URL }}js/lib/backbone.js"></script>
+    <script type="text/javascript" src="{{ settings.STATIC_URL }}js/lib/backbone-tastypie.js"></script>
+    <script type="text/javascript" src="{{ settings.STATIC_URL }}js/lib/bootstrap-modal.js"></script>
+    <script type="text/javascript" src="{{ settings.STATIC_URL }}js/lib/bootstrap-dropdown.js"></script>
+    <script type="text/javascript" src="{{ settings.STATIC_URL }}js/lib/json2.js"></script>
+    <script type="text/javascript" src="{{ settings.STATIC_URL }}js/lib/moment.js"></script>
+    <script type="text/javascript" src="{{ settings.STATIC_URL }}js/lib/leaflet.js"></script>
+    <script type="text/javascript" src="{{ settings.STATIC_URL }}js/lib/pusher.min.js"></script>
+    <script type="text/javascript" src="{{ settings.STATIC_URL }}js/application.js"></script>
 
-    <script type="text/javascript" src="{{ STATIC_URL }}js/models/active_calls.js"></script>
-    <script type="text/javascript" src="{{ STATIC_URL }}js/views/index.js"></script>
-    <script type="text/javascript" src="{{ STATIC_URL }}js/routers/index.js"></script>
+    <script type="text/javascript" src="{{ settings.STATIC_URL }}js/models/active_calls.js"></script>
+    <script type="text/javascript" src="{{ settings.STATIC_URL }}js/views/index.js"></script>
+    <script type="text/javascript" src="{{ settings.STATIC_URL }}js/routers/index.js"></script>
     {% endcompress %}
 
     <script id="marker-popover-template" type="text/x-template">
@@ -132,11 +133,18 @@
     <script type="text/javascript">
         $(function() {
             Sirens.bootstrap = {{ bootstrap_data|safe }}; 
+            Sirens.settings = {
+                PUSHER_KEY: "{{ settings.PUSHER_KEY }}",
+                PUSHER_CHANNEL: "{{ settings.PUSHER_CHANNEL }}",
+                DEFAULT_HOURS_DISPLAYED: {{ settings.DEFAULT_HOURS_DISPLAYED }}
+            };
 
             window.Index = new Sirens.routers.Index();
             Index.start_routing();
 
-            $('#welcome-modal').modal({
+            $("#start-time").text(moment().subtract("hours", Sirens.settings.DEFAULT_HOURS_DISPLAYED).format("h:mm a"));
+
+            $("#welcome-modal").modal({
                 backdrop: true,
                 keyboard: true,
                 //show: true

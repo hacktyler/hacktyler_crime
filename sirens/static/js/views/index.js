@@ -55,8 +55,8 @@ Sirens.views.Index = Backbone.View.extend({
     },
 
     init_socket: function() {
-        this.pusher = new Pusher("d20fddb74c58823cd05d");
-        this.channel = this.pusher.subscribe("presence-active-calls");
+        this.pusher = new Pusher(Sirens.settings.PUSHER_KEY);
+        this.channel = this.pusher.subscribe(Sirens.settings.PUSHER_CHANNEL);
 
         this.channel.bind("pusher:subscription_succeeded", _.bind(function(members) {
             this.member_count = members.count;
@@ -131,6 +131,8 @@ Sirens.views.Index = Backbone.View.extend({
         active_call.layer.addGeoJSON({ type: "Feature", geometry: active_call.get("point"), properties: active_call.toJSON() });
 
         this.active_calls_layers.addLayer(active_call.layer); 
+        
+        $("#active-call-count").text(this.active_calls.length);
     },
 
     show_popover: function(layer, properties) {
@@ -170,7 +172,7 @@ Sirens.views.Index = Backbone.View.extend({
         }
 
         layer.setStyle({ fillColor: "#ff0000" });
-        this.selected_layer = layer;
+        this.selected_layer = layer;    
     },
 
     pan_to: function(layer, properties) {

@@ -24,14 +24,14 @@ def index(request):
     serializer = Serializer()
     resource = ActiveCallResource()
 
-    since = datetime.now() - timedelta(hours=4)
+    since = datetime.now() - timedelta(hours=settings.DEFAULT_HOURS_DISPLAYED)
     calls = ActiveCall.objects.filter(reported__gt=since)
 
     bundles = [resource.build_bundle(obj=c) for c in calls]
     calls_bootstrap = [resource.full_dehydrate(b) for b in bundles]
 
     return render_to_response('index.html', {
-        'STATIC_URL': settings.STATIC_URL,
+        'settings': settings,
         'bootstrap_data': serializer.to_json({
             'active_calls': calls_bootstrap
         })

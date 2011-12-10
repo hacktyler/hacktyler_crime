@@ -169,6 +169,15 @@ LOGGING = {
     }
 }
 
+# Pusher
+PUSHER_APP_ID = '11732'
+PUSHER_KEY = 'd20fddb74c58823cd05d'
+PUSHER_SECRET = None # must be in local_settings.py
+PUSHER_CHANNEL = 'presence-active-calls-test'
+
+# App
+DEFAULT_HOURS_DISPLAYED = 4
+
 # Allow for local (per-user) override
 try:
     from local_settings import *

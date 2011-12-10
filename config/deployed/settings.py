@@ -25,3 +25,6 @@ CACHES = {
 # Django-compressor
 COMPRESS_ENABLED = True
 
+# Pusher
+PUSHER_CHANNEL = 'presence-active-calls'
+

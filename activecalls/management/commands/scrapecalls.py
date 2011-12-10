@@ -186,5 +186,5 @@ class Command(BaseCommand):
         bundle = resource.build_bundle(obj=active_call)
         bundle = resource.full_dehydrate(bundle)
 
-        p['presence-active-calls'].trigger(event, bundle.data)
+        p[settings.PUSHER_CHANNEL].trigger(event, bundle.data)
 
