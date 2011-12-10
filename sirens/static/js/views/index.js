@@ -40,10 +40,9 @@ Sirens.views.Index = Backbone.View.extend({
         zoom = 12;
         max_zoom = 17;
         
-        var center = new L.LatLng(lat, lng);
-
         this.map = new L.Map('map', {
-            zoom: zoom,
+            center:  new L.LatLng(lat, lng),
+            zoom: zoom
         });
 
         tiles = new L.TileLayer("http://{s}.google.com/vt/lyrs=m@155000000&hl=en&x={x}&y={y}&z={z}", {

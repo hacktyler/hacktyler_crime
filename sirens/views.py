@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 
+from datetime import datetime, timedelta
 import json
 from uuid import uuid4
 
@@ -23,7 +24,8 @@ def index(request):
     serializer = Serializer()
     resource = ActiveCallResource()
 
-    calls = ActiveCall.objects.all()
+    since = datetime.now() - timedelta(hours=4)
+    calls = ActiveCall.objects.filter(reported__gt=since)
 
     bundles = [resource.build_bundle(obj=c) for c in calls]
     calls_bootstrap = [resource.full_dehydrate(b) for b in bundles]
