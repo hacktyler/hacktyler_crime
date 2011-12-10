@@ -156,6 +156,16 @@ LOGGING = {
             'level': 'DEBUG',
             'propagate': False
         },
+        'requests.packages.urllib3.connectionpool': {
+            'handlers': ['console'],
+            'level': 'ERROR',
+            'propogate': False
+        },
+        'geopy': {
+            'handlers': ['console'],
+            'level': 'INFO',
+            'propogate': False
+        }
     }
 }
 
