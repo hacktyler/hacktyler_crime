@@ -19,7 +19,21 @@
             <div class="container">
                 <h3><a data-controls-modal="welcome-modal" data-keyboard="true" data-backdrop="true">Tyler Sirens</a></h3>
                 <ul class="nav">
-                    <li><a href="javascript:alert('TODO'); return false;">Find a location</a></li>
+                    <li class="dropdown" data-dropdown="dropdown">
+                        <a href="#" class="dropdown-toggle">Find a location</a>
+                        <ul class="dropdown-menu">
+                            <li><a href="#" class="location" data-latitude="32.3309" data-longitude="-95.3006" data-zoom="14">Azalea & Charnwood</a></li>
+                            <li><a href="#" class="location" data-latitude="32.3528" data-longitude="-95.3006" data-zoom="15">Downtown</a></li>
+                            <li><a href="#" class="location" data-latitude="32.3627" data-longitude="-95.3053" data-zoom="14">North Tyler</a></li>
+                            <li><a href="#" class="location" data-latitude="32.2811" data-longitude="-95.3024" data-zoom="14">South Tyler</a></li>
+                            <li class="divider"></li>
+                            <li><a href="#" class="location" data-latitude="32.3642" data-longitude="-95.3463" data-zoom="15">John Tyler HS</a></li>
+                            <li><a href="#" class="location" data-latitude="32.3021" data-longitude="-95.2964" data-zoom="15">Robert E. Lee HS</a></li>
+                            <li><a href="#" class="location" data-latitude="32.3350" data-longitude="-95.2828" data-zoom="15">Tyler Junior College</a></li>
+                            <li><a href="#" class="location" data-latitude="32.3164" data-longitude="-95.2541" data-zoom="15">University of Texas</a></li>
+
+                        </ul>
+                    </li>
                 </ul>
                 <ul class="nav secondary-nav">
                     <li><a id="test-anchor" href="#">Current users: <span id="member-count" class="count label notice">0</span></a></li>
@@ -79,6 +93,7 @@
     <script type="text/javascript" src="{{ STATIC_URL }}js/lib/backbone.js"></script>
     <script type="text/javascript" src="{{ STATIC_URL }}js/lib/backbone-tastypie.js"></script>
     <script type="text/javascript" src="{{ STATIC_URL }}js/lib/bootstrap-modal.js"></script>
+    <script type="text/javascript" src="{{ STATIC_URL }}js/lib/bootstrap-dropdown.js"></script>
     <script type="text/javascript" src="{{ STATIC_URL }}js/lib/json2.js"></script>
     <script type="text/javascript" src="{{ STATIC_URL }}js/lib/moment.js"></script>
     <script type="text/javascript" src="{{ STATIC_URL }}js/lib/leaflet.js"></script>

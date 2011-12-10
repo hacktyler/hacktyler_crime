@@ -19,6 +19,8 @@ Sirens.views.Index = Backbone.View.extend({
         this.init_map();
         this.init_socket();
 
+        $(".location").click({ view: this }, this.goto_location);
+
         return this;
     },
 
@@ -185,6 +187,18 @@ Sirens.views.Index = Backbone.View.extend({
 
     update_member_count: function() {
         $("#member-count").text(this.member_count);
+    },
+
+    goto_location: function(e) {
+        lat = $(this).attr("data-latitude");
+        lng = $(this).attr("data-longitude");
+        zoom = $(this).attr("data-zoom");
+
+        console.log(lat, lng, zoom);
+
+        e.data.view.map.setView(new L.LatLng(parseFloat(lat), parseFloat(lng)), zoom);
+
+        return false;
     }
 });
 
