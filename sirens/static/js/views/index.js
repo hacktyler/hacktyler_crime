@@ -113,10 +113,10 @@ Sirens.views.Index = Backbone.View.extend({
             e.layer.setStyle({
                 radius: 6,
                 color: "#000",
-                weight: 1,
+                weight: 1.5,
                 opacity: 1,
-                fillColor: "#ff7800",
-                fillOpacity: 0.8
+                fillColor: "#f89406",
+                fillOpacity: 1
             });
 
             (function(feature, active_call, mouseover_handler, click_handler) {
@@ -186,7 +186,7 @@ Sirens.views.Index = Backbone.View.extend({
         
         // Highlight only the selected point
         if (this.selected_feature) {
-            this.selected_feature.setStyle({ fillColor: "#ff7800" });
+            this.selected_feature.setStyle({ fillColor: "#f89406" });
         }
 
         active_call.feature.setStyle({ fillColor: "#ff0000" });
