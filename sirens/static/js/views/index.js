@@ -4,15 +4,7 @@ Sirens.views.Index = Backbone.View.extend({
     map: null,
     active_calls_layers: null,
     popover_template: null,
-
-    marker_style: {
-        radius: 8,
-        fillColor: "#ff7800",
-        color: "#000",
-        weight: 1,
-        opacity: 1,
-        fillOpacity: 0.8
-    },
+    selected_layer: null,
 
     pusher: null,
     channel: null,
@@ -100,6 +92,11 @@ Sirens.views.Index = Backbone.View.extend({
     },
 
     add_marker: function(active_call) {
+        // Don't attempt to display if there is no location data
+        if (active_call.get("point") == null) {
+            return;
+        }
+                
         active_call.layer = new L.GeoJSON(null, {
             pointToLayer: _.bind(function (latlng) {
                 return new L.CircleMarker(latlng);
@@ -107,27 +104,34 @@ Sirens.views.Index = Backbone.View.extend({
         });
 
         active_call.layer.on("featureparse", _.bind(function(e) {
-            e.layer.setStyle(this.marker_style);
+            e.layer.setStyle({
+                radius: 6,
+                color: "#000",
+                weight: 1,
+                opacity: 1,
+                fillColor: "#ff7800",
+                fillOpacity: 0.8
+            });
+            
+            ll = new L.LatLng(e.properties.point.coordinates[1], e.properties.point.coordinates[0]);
 
-            (function(properties, mouseover_handler, click_handler) {
-                e.layer.on("mouseover", function (e) { 
+            this.map.setView(ll, 15);
+            this.show_popover(e.layer, e.properties);
+
+            (function(layer, properties, mouseover_handler, click_handler) {
+                layer.on("mouseover", function (e) { 
                     mouseover_handler(properties);
                 });
 
-                e.layer.on("click", function(e) {
+                layer.on("click", function(e) {
                     click_handler(properties);
                 });
-            })(e.properties, this.show_popover, this.pan_to);
+            })(e.layer, e.properties, this.show_popover, this.pan_to);
         }, this));
 
         active_call.layer.addGeoJSON({ type: "Feature", geometry: active_call.get("point"), properties: active_call.toJSON() });
 
         this.active_calls_layers.addLayer(active_call.layer); 
-
-        ll = new L.LatLng(active_call.get("point").coordinates[1], active_call.get("point").coordinates[0]);
-
-        this.map.setView(ll, 15);
-        this.show_popover(active_call.toJSON());
     },
 
     show_popover: function(properties) {
@@ -160,6 +164,14 @@ Sirens.views.Index = Backbone.View.extend({
         }).appendTo(inner);
 
         popup.appendTo("#map");
+        
+        // Highlight only the selected point
+        if (this.selected_layer) {
+            this.selected_layer.setStyle({ fillColor: "#ff7800" });
+        }
+
+        layer.setStyle({ fillColor: "#ff0000" });
+        this.selected_layer = layer;
     },
 
     pan_to: function(properties) {
