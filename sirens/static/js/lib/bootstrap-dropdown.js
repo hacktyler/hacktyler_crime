@@ -31,9 +31,9 @@
         var li = $(this).parent('li')
           , isActive = li.hasClass('open')
 
-        clearMenus()
-        !isActive && li.toggleClass('open')
-        return false
+        clearMenus();
+        !isActive && li.toggleClass('open');
+        return false;
       })
     })
   }
