@@ -129,7 +129,10 @@
         <% } %>
         </p>
 
-        <div class="case-number">Case #<%= case_number %></div>
+        <div class="footer">
+            <div class="as-of">Last update: <%= moment(last_modified, "YYYY-MM-DDTHH:mm:ss").format("h:mm a") %></div>
+            <div class="case-number">Case #<%= case_number %></div>
+        </div>
     </script>
 
     <script id="active-call-item-template" type="text/x-template">

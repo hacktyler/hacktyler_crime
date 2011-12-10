@@ -11,7 +11,10 @@
 .active-call-item td { padding: 0; border: 0; }
 .active-call-item td:first-child { width: 300px; padding-right: 30px; }
 
+.popover { top: 15px; right: 15px; left: auto; display: block; }
 .popover h4 { font-size: larger; line-height: 24px; }
 .popover p { margin-bottom: 5px !important; } 
+.popover .footer { margin-top: 5px; }
+.popover .as-of { font-size: smaller; float: left; }
 .popover .case-number { font-size: smaller; text-align: right; }
 

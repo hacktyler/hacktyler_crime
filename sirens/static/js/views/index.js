@@ -159,13 +159,7 @@ Sirens.views.Index = Backbone.View.extend({
         
         var popup = $("<div>", {
             id: "marker-popover",
-            class: "popover",
-            css: {
-                top: "15px",
-                right: "15px",
-                left: "auto",
-                display: "block"
-            }
+            class: "popover"
         });
 
         var inner = $("<div>", {
