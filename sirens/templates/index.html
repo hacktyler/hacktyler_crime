@@ -63,7 +63,7 @@
             <h3>Welcome to Tyler Sirens</h3>
         </div>
         <div class="modal-body">
-            <p>This site uses real-time data made public by <strong>Tyler Police Department</strong> to create a visual police blotter for the city. Want to know what those sirens you heard were all about? Check the map!</p>
+            <p>This site uses real-time data made public by <strong>Tyler Police Department</strong> to create a visual police blotter for the city. Want to know what those sirens you're hearing are all about? Check the map!</p>
             
             <p>But, of course, there are limits to this system. To learn more about what isn't included, or about how this site was made, click the <strong>About</strong> button at the top of the main window.</p>
 
@@ -75,7 +75,7 @@
             </p>
         </div>
         <div class="modal-footer">
-            <input type="button" class="btn primary modal-close" value="Close" />
+            <input type="button" class="btn primary modal-close" value="Continue" />
         </div> 
     </div>
 
@@ -85,15 +85,23 @@
             <h3>About this site</h3>
         </div>
         <div class="modal-body">
-            TODO
+            <h6>Data</h6>
+            <p><strong>Tyler Sirens</strong> uses data from the Tyler Police Department's <a href="http://tylerpolice.com/acl/">Active Call List</a> (ACL). The ACL provides data about reported incidents, updated every two minutes. Along with the nature of the incident reported, the data also includes information about police response times and an approximate geographic location.</p>
+
+            <h6>Completeness</h6>
+            <p>The ACL excludes reports of some sensitive crimes, such as those involving children. Other crimes, including violent crimes, are delayed up to fifteen minutes in order to give police time ensure the safety of those involved. For more information about what is and is not included in the data, refer to the <a href="http://www.cityoftyler.org/Default.aspx?tabid=585">Active Call List FAQ</a>.</p>
+
+            <h6>Credits & Disclaimer</h6>
+            <p><strong>Tyler Sirens</strong> is a project of <a href="http://hacktyler.com/">Hack Tyler</a> and was developed by <a href="http://twitter.com/onyxfish">Christopher Groskopf</a>. This project has been endorsed or reviewed by the Tyler Police Department or any governmental authority. It should not be treated as authorative or complete. If you require further details about a police report, please follow up with <a href="http://www.cityoftyler.org/?TabId=98">Tyler PD</a> and reference the <strong>Case Number</strong> included in the report.</p>
         </div>
         <div class="modal-footer">
-            <input type="button" class="btn primary modal-close" value="Close" />
+            <input type="button" class="btn primary modal-close" value="Back to the map" />
         </div> 
     </div>
 
     {% compress js %}
     <script type="text/javascript" src="{{ settings.STATIC_URL }}js/lib/jquery-1.6.4.js"></script>
+    <script type="text/javascript" src="{{ settings.STATIC_URL }}js/lib/jquery.cookie.js"></script>
     <script type="text/javascript" src="{{ settings.STATIC_URL }}js/lib/underscore.js"></script>
     <script type="text/javascript" src="{{ settings.STATIC_URL }}js/lib/backbone.js"></script>
     <script type="text/javascript" src="{{ settings.STATIC_URL }}js/lib/backbone-tastypie.js"></script>
@@ -166,9 +174,13 @@
 
             $("#welcome-modal").modal({
                 backdrop: true,
-                keyboard: true,
-                //show: true
+                keyboard: true
             });
+
+            if (!$.cookie("has_seen_welcome")) {
+                $("#welcome-modal").modal("show");
+                $.cookie("has_seen_welcome", true);
+            }
         })
     </script>
 </body>
