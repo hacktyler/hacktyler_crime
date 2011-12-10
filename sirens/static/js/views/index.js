@@ -112,11 +112,8 @@ Sirens.views.Index = Backbone.View.extend({
                 fillColor: "#ff7800",
                 fillOpacity: 0.8
             });
-            
-            ll = new L.LatLng(e.properties.point.coordinates[1], e.properties.point.coordinates[0]);
 
-            this.map.setView(ll, 15);
-            this.show_popover(e.layer, e.properties);
+            this.pan_to(e.layer, e.properties);
 
             (function(layer, properties, mouseover_handler, click_handler) {
                 layer.on("mouseover", function (e) { 
@@ -124,7 +121,7 @@ Sirens.views.Index = Backbone.View.extend({
                 });
 
                 layer.on("click", function(e) {
-                    click_handler(properties);
+                    click_handler(layer, properties);
                 });
             })(e.layer, e.properties, this.show_popover, this.pan_to);
         }, this));
@@ -174,11 +171,11 @@ Sirens.views.Index = Backbone.View.extend({
         this.selected_layer = layer;
     },
 
-    pan_to: function(properties) {
+    pan_to: function(layer, properties) {
         ll = new L.LatLng(properties.point.coordinates[1], properties.point.coordinates[0]);
 
-        this.map.setView(ll, 15);
-        this.show_popover(properties);
+        this.map.setView(ll, 15, true);
+        this.show_popover(layer, properties);
     },
 
     update_marker: function(active_call) {
