@@ -1,5 +1,6 @@
+.container { width: 100%; }
 #content { margin-top: 40px; }
-#map { position: absolute; height: 100%; }
+#map { position: absolute; width: 100%; height: 100%; }
 
 #active-calls-list { max-width: 350px; white-space: nowrap; }
 .active-call-item table {
