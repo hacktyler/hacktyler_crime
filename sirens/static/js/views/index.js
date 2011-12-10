@@ -120,7 +120,7 @@ Sirens.views.Index = Backbone.View.extend({
 
             (function(layer, properties, mouseover_handler, click_handler) {
                 layer.on("mouseover", function (e) { 
-                    mouseover_handler(properties);
+                    mouseover_handler(layer, properties);
                 });
 
                 layer.on("click", function(e) {
@@ -134,7 +134,7 @@ Sirens.views.Index = Backbone.View.extend({
         this.active_calls_layers.addLayer(active_call.layer); 
     },
 
-    show_popover: function(properties) {
+    show_popover: function(layer, properties) {
         // Clear previous popover
         $("#marker-popover").remove();
         
