@@ -134,6 +134,19 @@
         <div class="case-number">Case #<%= case_number %></div>
     </script>
 
+    <script id="active-call-item-template" type="text/x-template">
+        <li>
+            <a href="#" class="active-call-item" data-id="<%= resource_uri %>">
+                <table>
+                    <tr>
+                        <td><%= incident %></span></td>
+                        <td><%= moment(reported, "YYYY-MM-DDTHH:mm:ss").format("h:mm a") %></span></td>
+                    </tr>
+                </table>
+            </a>
+        </li>
+    </script>
+
     <script type="text/javascript">
         $(function() {
             Sirens.bootstrap = {{ bootstrap_data|safe }}; 

@@ -2,6 +2,13 @@
 #map { position: absolute; height: 100%; }
 
 #active-calls-list { max-width: 350px; white-space: nowrap; }
+.active-call-item table {
+    width: default;
+    margin-bottom: 0;
+    border: 0;
+}
+.active-call-item td { padding: 0; border: 0; }
+.active-call-item td:first-child { width: 300px; padding-right: 30px; }
 
 .popover h4 { font-size: larger; line-height: 24px; }
 .popover p { margin-bottom: 5px !important; } 

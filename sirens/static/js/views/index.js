@@ -4,6 +4,7 @@ Sirens.views.Index = Backbone.View.extend({
     map: null,
     active_calls_layers: null,
     popover_template: null,
+    active_call_item_template: null,
     selected_feature: null,
 
     pusher: null,
@@ -14,6 +15,7 @@ Sirens.views.Index = Backbone.View.extend({
         _.bindAll(this, "render", "show_popover", "pan_to", "add_marker", "update_marker");
 
         this.marker_template = _.template($("#marker-popover-template").html());
+        this.active_call_item_template = _.template($("#active-call-item-template").html());
 
         this.init_active_calls();
         this.init_map();
@@ -213,9 +215,9 @@ Sirens.views.Index = Backbone.View.extend({
         copy = this.active_calls.models.slice(0);
         copy.reverse(); 
 
-        _.each(copy, function(active_call) {
-            $("#active-calls-list").append('<li><a href="#" class="active-call-item" data-id="' + active_call.id + '">' + active_call.get("incident") + ' (' + moment(active_call.get("reported"), "YYYY-MM-DDTHH:mm:ss").format("h:mm a") + ')</a></li>');
-        });
+        _.each(copy, _.bind(function(active_call) {
+            $("#active-calls-list").append(this.active_call_item_template(active_call.toJSON()));
+        }, this));
         
         $("#active-call-count").text(this.active_calls.length);
     },
