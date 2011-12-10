@@ -4,7 +4,7 @@ Sirens.views.Index = Backbone.View.extend({
     map: null,
     active_calls_layers: null,
     popover_template: null,
-    selected_layer: null,
+    selected_feature: null,
 
     pusher: null,
     channel: null,
@@ -20,6 +20,8 @@ Sirens.views.Index = Backbone.View.extend({
         this.init_socket();
 
         $(".location").click({ view: this }, this.goto_location);
+
+        $(".active-call-item").live("click", { view: this }, this.clicked_active_call_item);
 
         return this;
     },
@@ -115,27 +117,41 @@ Sirens.views.Index = Backbone.View.extend({
                 fillOpacity: 0.8
             });
 
-            this.pan_to(e.layer, e.properties);
-
-            (function(layer, properties, mouseover_handler, click_handler) {
-                layer.on("mouseover", function (e) { 
-                    mouseover_handler(layer, properties);
+            (function(feature, active_call, mouseover_handler, click_handler) {
+                feature.on("mouseover", function (e) { 
+                    mouseover_handler(active_call);
                 });
 
-                layer.on("click", function(e) {
-                    click_handler(layer, properties);
+                feature.on("click", function(e) {
+                    click_handler(active_call);
                 });
-            })(e.layer, e.properties, this.show_popover, this.pan_to);
+            })(e.layer, active_call, this.show_popover, this.pan_to);
         }, this));
 
         active_call.layer.addGeoJSON({ type: "Feature", geometry: active_call.get("point"), properties: active_call.toJSON() });
 
+        active_call.feature = this.feature_from_geojson(active_call.layer);
+
         this.active_calls_layers.addLayer(active_call.layer); 
         
-        $("#active-call-count").text(this.active_calls.length);
+        this.pan_to(active_call);
+        this.refresh_active_calls_list();
     },
 
-    show_popover: function(layer, properties) {
+    feature_from_geojson: function(geojson) {
+        /*
+         * This is a super-dirty hack to work around Leaflet's lack of access
+         * to individual geojson features. This only works because I know there
+         * is only ever one feature in this data.
+         */
+        features = geojson._layers;
+
+        for (var feature in features) {
+            return features[feature];
+        }
+    },
+
+    show_popover: function(active_call) {
         // Clear previous popover
         $("#marker-popover").remove();
         
@@ -155,31 +171,31 @@ Sirens.views.Index = Backbone.View.extend({
         }).appendTo(popup);
 
         var header = $("<div>", {
-            html: "<h4>" + properties.incident + "</h4>",
+            html: "<h4>" + active_call.get("incident") + "</h4>",
             class: "title"
         }).appendTo(inner);
 
         var body = $("<div>", {
-            html: $(this.marker_template(properties)),
+            html: $(this.marker_template(active_call.toJSON())),
             class: "content"
         }).appendTo(inner);
 
         popup.appendTo("#map");
         
         // Highlight only the selected point
-        if (this.selected_layer) {
-            this.selected_layer.setStyle({ fillColor: "#ff7800" });
+        if (this.selected_feature) {
+            this.selected_feature.setStyle({ fillColor: "#ff7800" });
         }
 
-        layer.setStyle({ fillColor: "#ff0000" });
-        this.selected_layer = layer;    
+        active_call.feature.setStyle({ fillColor: "#ff0000" });
+        this.selected_feature = active_call.feature;    
     },
 
-    pan_to: function(layer, properties) {
-        ll = new L.LatLng(properties.point.coordinates[1], properties.point.coordinates[0]);
+    pan_to: function(active_call) {
+        ll = new L.LatLng(active_call.get("point").coordinates[1], active_call.get("point").coordinates[0]);
 
         this.map.setView(ll, 15, true);
-        this.show_popover(layer, properties);
+        this.show_popover(active_call);
     },
 
     update_marker: function(active_call) {
@@ -189,6 +205,25 @@ Sirens.views.Index = Backbone.View.extend({
 
     update_member_count: function() {
         $("#member-count").text(this.member_count);
+    },
+
+    refresh_active_calls_list: function() {
+        $("#active-calls-list").empty();
+
+        copy = this.active_calls.models.slice(0);
+        copy.reverse(); 
+
+        _.each(copy, function(active_call) {
+            $("#active-calls-list").append('<li><a href="#" class="active-call-item" data-id="' + active_call.id + '">' + active_call.get("incident") + ' (' + moment(active_call.get("reported"), "YYYY-MM-DDTHH:mm:ss").format("h:mm a") + ')</a></li>');
+        });
+        
+        $("#active-call-count").text(this.active_calls.length);
+    },
+
+    clicked_active_call_item: function(e) {
+        active_call = e.data.view.active_calls.get($(this).attr("data-id"));
+
+        e.data.view.pan_to(active_call); 
     },
 
     goto_location: function(e) {

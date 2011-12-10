@@ -14,12 +14,12 @@
     {% endcompress %}
 </head>
 <body>
-    <div class="topbar">
+    <div class="topbar" data-dropdown="dropdown">
         <div class="topbar-inner">
             <div class="container">
                 <h3><a data-controls-modal="welcome-modal" data-keyboard="true" data-backdrop="true">Tyler Sirens</a></h3>
                 <ul class="nav">
-                    <li class="dropdown" data-dropdown="dropdown">
+                    <li class="dropdown">
                         <a href="#" class="dropdown-toggle">Find a location</a>
                         <ul class="dropdown-menu">
                             <li><a href="#" class="location" data-latitude="32.3309" data-longitude="-95.3006" data-zoom="14">Azalea & Charnwood</a></li>
@@ -36,8 +36,12 @@
                     </li>
                 </ul>
                 <ul class="nav secondary-nav">
-                    <li><a href="#">Active calls since <span id="start-time"></span>: <span id="active-call-count" class="count label notice">0</span></a></li>
-                    <li><a href="#">Current users: <span id="member-count" class="count label notice">0</span></a></li>
+                    <li class="dropdown">
+                        <a href="#" class="dropdown-toggle">Active calls since <span id="start-time"></span>: <span id="active-call-count" class="count label warning">0</span></a>
+                        <ul id="active-calls-list" class="dropdown-menu">
+                        </ul>
+                    </li>
+                    <li><a href="#">Current users: <span id="member-count" class="count label success">0</span></a></li>
                     <li><a data-controls-modal="about-modal" data-keyboard="true" data-backdrop="true">About</a></li>
                 </ul>
             </div>
