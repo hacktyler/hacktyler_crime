@@ -1,7 +1,7 @@
 #content { margin-top: 40px; }
 #map { position: absolute; height: 100%; }
 
-#active-calls-list { max-width: 300px; }
+#active-calls-list { max-width: 350px; white-space: nowrap; }
 
 .popover h4 { font-size: larger; line-height: 24px; }
 .popover p { margin-bottom: 5px !important; } 
