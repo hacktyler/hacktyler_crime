@@ -35,16 +35,18 @@ Sirens.views.Index = Backbone.View.extend({
     init_map: function() {
         lat = 32.349549;
         lng = -95.301829;
-        zoom = 12;
+        default_zoom = 12,
+        min_zoom = 12;
         max_zoom = 17;
         
         this.map = new L.Map('map', {
             center:  new L.LatLng(lat, lng),
-            zoom: zoom
+            zoom: default_zoom,
+            minZoom: min_zoom,
+            maxZoom: max_zoom
         });
 
         tiles = new L.TileLayer("http://{s}.google.com/vt/lyrs=m@155000000&hl=en&x={x}&y={y}&z={z}", {
-            maxZoom: max_zoom,
             attribution: "Map data is Copyright Google, 2011",
             subdomains: ["mt0", "mt1", "mt2", "mt3"]
         });
