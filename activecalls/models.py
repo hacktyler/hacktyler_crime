@@ -53,13 +53,20 @@ class ActiveCall(models.Model):
 
     def save(self, *args, **kwargs):
         geocoder = GoogleGeocoder()
+
         try:
             if not self.cross_street_name:
                 log.info('Not geocoding without a cross street (%s)' % self.case_number)
                 raise GeocodingError('Must have an intersection to geocode.')
 
             try:
-                location = '%(street_prefix)s %(street_name)s %(street_suffix)s and %(cross_street_name)s %(cross_street_suffix)s Tyler, TX' % model_to_dict(self)
+                location = '%s %s %s and %s %s Tyler, TX' % (
+                    self.street_prefix,
+                    self.street_name,
+                    'HWY' if self.street_suffix == 'HW' else self.street_suffix,
+                    self.cross_street_name,
+                    'HWY' if self.cross_street_suffix == 'HW' else self.cross_street_suffix
+                )
 
                 results = geocoder.get(location)
             
@@ -70,7 +77,12 @@ class ActiveCall(models.Model):
                     raise GeocodingError('Google failed to find an intersection matching this location.')
             except (ValueError, GeocodingError):
                 try:
-                    location = '%(street_number)s %(street_prefix)s %(street_name)s %(street_suffix)s Tyler, TX' % model_to_dict(self)
+                    location = '%s %s %s %s Tyler, TX' % (
+                        self.street_number,
+                        self.street_prefix,
+                        self.street_name,
+                        'HWY' if self.street_suffix == 'HW' else self.street_suffix
+                    )
 
                     results = geocoder.get(location)
                 
