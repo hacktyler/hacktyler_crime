@@ -1,5 +1,8 @@
 #!/usr/bin/env python
 
+import logging 
+log = logging.getLogger('activecalls.models')
+
 from googlegeocoder import GoogleGeocoder
 
 from django.contrib.gis.db import models
@@ -50,14 +53,17 @@ class ActiveCall(models.Model):
 
     def save(self, *args, **kwargs):
         geocoder = GoogleGeocoder()
+            
+        location = '%(street_prefix)s %(street_name)s %(street_suffix)s and %(cross_street_name)s %(cross_street_suffix)s Tyler, TX' % model_to_dict(self)
 
         try:
             if not self.cross_street_name:
                 raise GeocodingError('Must have an intersection to geocode.')
-            
-            location = '%(street_prefix)s %(street_name)s %(street_suffix)s and %(cross_street_name)s %(cross_street_suffix)s Tyler, TX' % model_to_dict(self)
 
-            results = geocoder.get(location)
+            try:
+                results = geocoder.get(location)
+            except ValueError:
+                raise GeocodingError('Failed to geocode.')
 
             if not results:
                 raise GeocodingError('Failed to geocode.')
@@ -75,6 +81,7 @@ class ActiveCall(models.Model):
 
             self.point = Point(lng, lat)
         except GeocodingError:
+            log.info('Failed to geocode "%s" (%s)' % (location, self.case_number))
             self.point = None
 
         super(ActiveCall, self).save(*args, **kwargs)
