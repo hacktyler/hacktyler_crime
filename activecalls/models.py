@@ -53,27 +53,23 @@ class ActiveCall(models.Model):
 
     def save(self, *args, **kwargs):
         geocoder = GoogleGeocoder()
-            
-        location = '%(street_prefix)s %(street_name)s %(street_suffix)s and %(cross_street_name)s %(cross_street_suffix)s Tyler, TX' % model_to_dict(self)
-
         try:
             if not self.cross_street_name:
+                log.info('Not geocoding without a cross street (%s)' % self.case_number)
                 raise GeocodingError('Must have an intersection to geocode.')
+            
+            location = '%(street_prefix)s %(street_name)s %(street_suffix)s and %(cross_street_name)s %(cross_street_suffix)s Tyler, TX' % model_to_dict(self)
 
             try:
                 results = geocoder.get(location)
             except ValueError:
+                log.info('Failed to geocode: "%s" (%s)' % (location, self.case_number))
                 raise GeocodingError('Failed to geocode.')
 
-            if not results:
-                raise GeocodingError('Failed to geocode.')
-
-            try:
-                types = results[0].types
-            except KeyError:
-                raise GeocodingError('No first result found.')
+            types = results[0].types
 
             if 'intersection' not in types:
+                log.info('Geocoded to %s, not intersection: "%s" (%s)' % (unicode(types), location, self.case_number))
                 raise GeocodingError('Google failed to find an intersection matching this location.')
 
             lat = results[0].geometry.location.lat
@@ -81,7 +77,6 @@ class ActiveCall(models.Model):
 
             self.point = Point(lng, lat)
         except GeocodingError:
-            log.info('Failed to geocode "%s" (%s)' % (location, self.case_number))
             self.point = None
 
         super(ActiveCall, self).save(*args, **kwargs)
