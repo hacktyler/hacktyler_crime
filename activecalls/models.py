@@ -57,20 +57,32 @@ class ActiveCall(models.Model):
             if not self.cross_street_name:
                 log.info('Not geocoding without a cross street (%s)' % self.case_number)
                 raise GeocodingError('Must have an intersection to geocode.')
-            
-            location = '%(street_prefix)s %(street_name)s %(street_suffix)s and %(cross_street_name)s %(cross_street_suffix)s Tyler, TX' % model_to_dict(self)
 
             try:
+                location = '%(street_prefix)s %(street_name)s %(street_suffix)s and %(cross_street_name)s %(cross_street_suffix)s Tyler, TX' % model_to_dict(self)
+
                 results = geocoder.get(location)
+            
+                types = results[0].types
+
+                if 'intersection' not in types:
+                    log.info('Geocoded to %s, not intersection: "%s" (%s)' % (unicode(types), location, self.case_number))
+                    raise GeocodingError('Google failed to find an intersection matching this location.')
             except ValueError:
-                log.info('Failed to geocode: "%s" (%s)' % (location, self.case_number))
-                raise GeocodingError('Failed to geocode.')
+                try:
+                    location = '%(street_number)s %(street_prefix)s %(street_name)s %(street_suffix)s Tyler, TX' % model_to_dict(self)
 
-            types = results[0].types
+                    results = geocoder.get(location)
+                
+                    types = results[0].types
 
-            if 'intersection' not in types:
-                log.info('Geocoded to %s, not intersection: "%s" (%s)' % (unicode(types), location, self.case_number))
-                raise GeocodingError('Google failed to find an intersection matching this location.')
+                    if 'street_address' not in types:
+                        log.info('Geocoded to %s, not street_address: "%s" (%s)' % (unicode(types), location, self.case_number))
+                        raise GeocodingError('Google failed to find an intersection matching this location.')
+
+                except ValueError:
+                    log.info('Failed to geocode: "%s" (%s)' % (location, self.case_number))
+                    raise GeocodingError('Failed to geocode.')
 
             lat = results[0].geometry.location.lat
             lng = results[0].geometry.location.lng
