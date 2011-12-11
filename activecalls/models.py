@@ -1,11 +1,13 @@
 #!/usr/bin/env python
 
-from geopy import geocoders
-from geopy.geocoders.base import GeocoderError
+from googlegeocoder import GoogleGeocoder
 
 from django.contrib.gis.db import models
 from django.contrib.gis.geos import Point
 from django.forms.models import model_to_dict
+
+class GeocodingError(Exception):
+    pass
 
 class ActiveCall(models.Model):
     """
@@ -47,21 +49,33 @@ class ActiveCall(models.Model):
         return u'Case #%s - %s' % (self.case_number, self.incident)
 
     def save(self, *args, **kwargs):
-        geocoder = geocoders.Google()
-        
-        location = '%(street_prefix)s %(street_name)s %(street_suffix)s and %(cross_street_name)s %(cross_street_suffix)s Tyler, TX' % model_to_dict(self)
+        geocoder = GoogleGeocoder()
 
         try:
-            place, (lat, lng) = geocoder.geocode(location)
+            if not self.cross_street_name:
+                raise GeocodingError('Must have an intersection to geocode.')
+            
+            location = '%(street_prefix)s %(street_name)s %(street_suffix)s and %(cross_street_name)s %(cross_street_suffix)s Tyler, TX' % model_to_dict(self)
 
-            if not place:
-                self.point = None
-            else:
-                self.point = Point(lng, lat)
-        except GeocoderError:
+            results = geocoder.get(location)
+
+            if not results:
+                raise GeocodingError('Failed to geocode.')
+
+            try:
+                types = results[0].types
+            except KeyError:
+                raise GeocodingError('No first result found.')
+
+            if 'intersection' not in types:
+                raise GeocodingError('Google failed to find an intersection matching this location.')
+
+            lat = results[0].geometry.location.lat
+            lng = results[0].geometry.location.lng
+
+            self.point = Point(lng, lat)
+        except GeocodingError:
             self.point = None
-        except ValueError:
-            self.point = None
-        
+
         super(ActiveCall, self).save(*args, **kwargs)
 
