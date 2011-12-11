@@ -158,22 +158,22 @@ Sirens.views.Index = Backbone.View.extend({
         $("#marker-popover").remove();
         
         var popup = $("<div>", {
-            id: "marker-popover",
-            class: "popover"
+            "id": "marker-popover",
+            "class": "popover"
         });
 
         var inner = $("<div>", {
-            class: "inner"
+            "class": "inner"
         }).appendTo(popup);
 
         var header = $("<div>", {
-            html: "<h4>" + active_call.get("incident") + "</h4>",
-            class: "title"
+            "html": "<h4>" + active_call.get("incident") + "</h4>",
+            "class": "title"
         }).appendTo(inner);
 
         var body = $("<div>", {
-            html: $(this.marker_template(active_call.toJSON())),
-            class: "content"
+            "html": $(this.marker_template(active_call.toJSON())),
+            "class": "content"
         }).appendTo(inner);
 
         popup.appendTo("#map");
