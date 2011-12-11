@@ -68,7 +68,7 @@ class ActiveCall(models.Model):
                 if 'intersection' not in types:
                     log.info('Geocoded to %s, not intersection: "%s" (%s)' % (unicode(types), location, self.case_number))
                     raise GeocodingError('Google failed to find an intersection matching this location.')
-            except ValueError:
+            except (ValueError, GeocodingError):
                 try:
                     location = '%(street_number)s %(street_prefix)s %(street_name)s %(street_suffix)s Tyler, TX' % model_to_dict(self)
 
