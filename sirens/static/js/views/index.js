@@ -227,11 +227,7 @@ Sirens.views.Index = Backbone.View.extend({
         lng = $(this).attr("data-longitude");
         zoom = $(this).attr("data-zoom");
 
-        console.log(lat, lng, zoom);
-
         e.data.view.map.setView(new L.LatLng(parseFloat(lat), parseFloat(lng)), zoom);
-
-        return false;
     }
 });
 
