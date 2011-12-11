@@ -3,6 +3,7 @@
 import datetime
 import logging 
 log = logging.getLogger('activecalls.scrapecalls')
+import time
 
 from dateutil import parser
 from django.conf import settings
@@ -164,6 +165,7 @@ class Command(BaseCommand):
 
             active_call.last_seen = call_data['last_seen'] 
             active_call.save()
+            time.sleep(1)
 
             if modified:
                 self.push_notification('changed_active_call', active_call)

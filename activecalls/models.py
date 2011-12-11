@@ -76,6 +76,8 @@ class ActiveCall(models.Model):
             lng = results[0].geometry.location.lng
 
             self.point = Point(lng, lat)
+            
+            log.info('Successfully geocoded: "%s" (%s)' % (location, self.case_number))
         except GeocodingError:
             self.point = None
 
