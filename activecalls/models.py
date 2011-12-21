@@ -53,80 +53,81 @@ class ActiveCall(models.Model):
         """
         return u'Case #%s - %s' % (self.case_number, self.incident)
 
-    def save(self, *args, **kwargs):
-        try:
-            if not self.cross_street_name:
-                log.info('Not attempting intersection geocoding without a cross street (%s)' % self.case_number)
-                raise GeocodingError('Must have an intersection to geocode.')
-
+    def save(self, geocode=True, *args, **kwargs):
+        if geocode:
             try:
-                location = '%s and %s' % (
-                    self.street_name,
-                    self.cross_street_name
-                )
+                if not self.cross_street_name:
+                    log.info('Not attempting intersection geocoding without a cross street (%s)' % self.case_number)
+                    raise GeocodingError('Must have an intersection to geocode.')
 
-                response = requests.post('%s?key=%s&inFormat=json' % (MAPQUEST_API, settings.MAPQUEST_API_KEY), json.dumps({
-                        'location': {
-                            'street': location,
-                            'city': 'tyler',
-                            'state': 'tx',
-                            'county': 'smith'
-                        },
-                        'options': {
-                            'thumbMaps': False,
-                            'maxResults': 1
-                        }
-                    })
-                )
+                try:
+                    location = '%s and %s' % (
+                        self.street_name,
+                        self.cross_street_name
+                    )
 
-                if response.status_code != 200:
-                    raise GeocodingError('MapQuest API returned status code: %s' % response.status_code)
+                    response = requests.post('%s?key=%s&inFormat=json' % (MAPQUEST_API, settings.MAPQUEST_API_KEY), json.dumps({
+                            'location': {
+                                'street': location,
+                                'city': 'tyler',
+                                'state': 'tx',
+                                'county': 'smith'
+                            },
+                            'options': {
+                                'thumbMaps': False,
+                                'maxResults': 1
+                            }
+                        })
+                    )
 
-                data = json.loads(response.content)        
-                result = data['results'][0]
+                    if response.status_code != 200:
+                        raise GeocodingError('MapQuest API returned status code: %s' % response.status_code)
 
-                if result['locations'][0]['geocodeQuality'] != 'INTERSECTION':
-                    log.info('Geocoded to %s, not INTERSECTION: "%s" (%s)' % (result['locations'][0]['geocodeQuality'], location, self.case_number))
-                    raise GeocodingError('MapQuest failed to find an intersection matching this location.')
+                    data = json.loads(response.content)        
+                    result = data['results'][0]
+
+                    if result['locations'][0]['geocodeQuality'] != 'INTERSECTION':
+                        log.info('Geocoded to %s, not INTERSECTION: "%s" (%s)' % (result['locations'][0]['geocodeQuality'], location, self.case_number))
+                        raise GeocodingError('MapQuest failed to find an intersection matching this location.')
+                except GeocodingError:
+                    location = '%s %s %s' % (
+                        self.street_number,
+                        self.street_prefix,
+                        self.street_name,
+                    )
+
+                    response = requests.post('%s?key=%s&inFormat=json' % (MAPQUEST_API, settings.MAPQUEST_API_KEY), json.dumps({
+                            'location': {
+                                'street': location,
+                                'city': 'tyler',
+                                'state': 'tx',
+                                'county': 'smith'
+                            },
+                            'options': {
+                                'thumbMaps': False,
+                                'maxResults': 1
+                            }
+                        })
+                    )
+
+                    if response.status_code != 200:
+                        raise GeocodingError('MapQuest API returned status code: %s' % response.status_code)
+                
+                    data = json.loads(response.content)        
+                    result = data['results'][0]
+
+                    if result['locations'][0]['geocodeQuality'] not in ('ADDRESS', 'STREET'):
+                        log.info('Geocoded to %s, not ADDRESS or STREET: "%s" (%s)' % (result['locations'][0]['geocodeQuality'], location, self.case_number))
+                        raise GeocodingError('MapQuest failed to find a street matching this location.')
+
+                lat = result['locations'][0]['latLng']['lat']
+                lng = result['locations'][0]['latLng']['lng']
+
+                self.point = Point(lng, lat)
+                
+                log.info('Successfully geocoded: "%s" (%s)' % (location, self.case_number))
             except GeocodingError:
-                location = '%s %s %s' % (
-                    self.street_number,
-                    self.street_prefix,
-                    self.street_name,
-                )
-
-                response = requests.post('%s?key=%s&inFormat=json' % (MAPQUEST_API, settings.MAPQUEST_API_KEY), json.dumps({
-                        'location': {
-                            'street': location,
-                            'city': 'tyler',
-                            'state': 'tx',
-                            'county': 'smith'
-                        },
-                        'options': {
-                            'thumbMaps': False,
-                            'maxResults': 1
-                        }
-                    })
-                )
-
-                if response.status_code != 200:
-                    raise GeocodingError('MapQuest API returned status code: %s' % response.status_code)
-            
-                data = json.loads(response.content)        
-                result = data['results'][0]
-
-                if result['locations'][0]['geocodeQuality'] not in ('ADDRESS', 'STREET'):
-                    log.info('Geocoded to %s, not ADDRESS or STREET: "%s" (%s)' % (result['locations'][0]['geocodeQuality'], location, self.case_number))
-                    raise GeocodingError('MapQuest failed to find a street matching this location.')
-
-            lat = result['locations'][0]['latLng']['lat']
-            lng = result['locations'][0]['latLng']['lng']
-
-            self.point = Point(lng, lat)
-            
-            log.info('Successfully geocoded: "%s" (%s)' % (location, self.case_number))
-        except GeocodingError:
-            self.point = None
+                self.point = None
 
         super(ActiveCall, self).save(*args, **kwargs)
 

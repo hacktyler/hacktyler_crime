@@ -164,7 +164,7 @@ class Command(BaseCommand):
                 active_call.last_modified = call_data['last_modified']
 
             active_call.last_seen = call_data['last_seen'] 
-            active_call.save()
+            active_call.save(geocode=modified)  # only geocode if something has changed
             time.sleep(1)
 
             if modified:
