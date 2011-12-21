@@ -53,18 +53,6 @@ class ActiveCall(models.Model):
         """
         return u'Case #%s - %s' % (self.case_number, self.incident)
 
-    def _normalize_suffix(self, suffix):
-        if suffix == 'HW':
-            return 'HWY'
-
-        if suffix == 'PK':
-            return 'PKWY'
-
-        if suffix == '' and self.street_name.lower() in ('1st', '2nd', '3rd', '4th', '5th', '6th', '7th', '8th', '9th', '10th'):
-            return 'ST'
-
-        return suffix
-
     def save(self, *args, **kwargs):
         try:
             if not self.cross_street_name:
@@ -101,11 +89,10 @@ class ActiveCall(models.Model):
                     log.info('Geocoded to %s, not INTERSECTION: "%s" (%s)' % (result['locations'][0]['geocodeQuality'], location, self.case_number))
                     raise GeocodingError('MapQuest failed to find an intersection matching this location.')
             except GeocodingError:
-                location = '%s %s %s %s' % (
+                location = '%s %s %s' % (
                     self.street_number,
                     self.street_prefix,
                     self.street_name,
-                    self._normalize_suffix(self.street_suffix)
                 )
 
                 response = requests.post('%s?key=%s&inFormat=json' % (MAPQUEST_API, settings.MAPQUEST_API_KEY), json.dumps({
