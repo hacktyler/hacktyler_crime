@@ -3,11 +3,13 @@
 import logging 
 log = logging.getLogger('activecalls.models')
 
-from googlegeocoder import GoogleGeocoder
-
+from django.conf import settings
 from django.contrib.gis.db import models
 from django.contrib.gis.geos import Point
-from django.forms.models import model_to_dict
+from django.utils import simplejson as json
+import requests
+
+MAPQUEST_API = 'http://www.mapquestapi.com/geocoding/v1/address'
 
 class GeocodingError(Exception):
     pass
@@ -64,15 +66,13 @@ class ActiveCall(models.Model):
         return suffix
 
     def save(self, *args, **kwargs):
-        geocoder = GoogleGeocoder()
-
         try:
             if not self.cross_street_name:
                 log.info('Not geocoding without a cross street (%s)' % self.case_number)
                 raise GeocodingError('Must have an intersection to geocode.')
 
             try:
-                location = '%s %s %s and %s %s Tyler, TX' % (
+                location = '%s %s %s and %s %s' % (
                     self.street_prefix,
                     self.street_name,
                     self._normalize_suffix(self.street_suffix),
@@ -80,36 +80,63 @@ class ActiveCall(models.Model):
                     self._normalize_suffix(self.cross_street_suffix)
                 )
 
-                results = geocoder.get(location)
+                response = requests.post('%s?key=%s&inFormat=json' % (MAPQUEST_API, settings.MAPQUEST_API_KEY), json.dumps({
+                        'location': {
+                            'street': location,
+                            'city': 'tyler',
+                            'state': 'tx',
+                            'county': 'smith'
+                        },
+                        'options': {
+                            'thumbMaps': False,
+                            'maxResults': 1
+                        }
+                    })
+                )
+
+                if response.status_code != 200:
+                    raise GeocodingError('MapQuest API returned status code: %s' % response.status_code)
+
+                data = json.loads(response.content)        
+                result = data['results'][0]
+
+                if result['locations'][0]['geocodeQuality'] == 'INTERSECTION':
+                    log.info('Geocoded to %s, not intersection: "%s" (%s)' % (result['locations'][0]['geocodeQuality'], location, self.case_number))
+                    raise GeocodingError('MapQuest failed to find an intersection matching this location.')
+            except GeocodingError:
+                location = '%s %s %s %s Tyler, TX' % (
+                    self.street_number,
+                    self.street_prefix,
+                    self.street_name,
+                    self._normalize_suffix(self.street_suffix)
+                )
+
+                response = requests.post('%s?key=%s&inFormat=json' % (MAPQUEST_API, settings.MAPQUEST_API_KEY), json.dumps({
+                        'location': {
+                            'street': location,
+                            'city': 'tyler',
+                            'state': 'tx',
+                            'county': 'smith'
+                        },
+                        'options': {
+                            'thumbMaps': False,
+                            'maxResults': 1
+                        }
+                    })
+                )
+
+                if response.status_code != 200:
+                    raise GeocodingError('MapQuest API returned status code: %s' % response.status_code)
             
-                types = results[0].types
+                data = json.loads(response.content)        
+                result = data['results'][0]
 
-                if 'intersection' not in types:
-                    log.info('Geocoded to %s, not intersection: "%s" (%s)' % (unicode(types), location, self.case_number))
-                    raise GeocodingError('Google failed to find an intersection matching this location.')
-            except (ValueError, GeocodingError):
-                try:
-                    location = '%s %s %s %s Tyler, TX' % (
-                        self.street_number,
-                        self.street_prefix,
-                        self.street_name,
-                        self._normalize_suffix(self.street_suffix)
-                    )
+                if result['locations'][0]['geocodeQuality'] == 'STREET':
+                    log.info('Geocoded to %s, not street: "%s" (%s)' % (result['geocodeQuality'], location, self.case_number))
+                    raise GeocodingError('MapQuest failed to find a street matching this location.')
 
-                    results = geocoder.get(location)
-                
-                    types = results[0].types
-
-                    if 'street_address' not in types:
-                        log.info('Geocoded to %s, not street_address: "%s" (%s)' % (unicode(types), location, self.case_number))
-                        raise GeocodingError('Google failed to find an intersection matching this location.')
-
-                except ValueError:
-                    log.info('Failed to geocode: "%s" (%s)' % (location, self.case_number))
-                    raise GeocodingError('Failed to geocode.')
-
-            lat = results[0].geometry.location.lat
-            lng = results[0].geometry.location.lng
+            lat = result['locations'][0]['latLng']['lat']
+            lng = result['locations'][0]['latLng']['lng']
 
             self.point = Point(lng, lat)
             
