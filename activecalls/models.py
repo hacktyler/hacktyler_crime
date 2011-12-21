@@ -68,16 +68,13 @@ class ActiveCall(models.Model):
     def save(self, *args, **kwargs):
         try:
             if not self.cross_street_name:
-                log.info('Not geocoding without a cross street (%s)' % self.case_number)
+                log.info('Not attempting intersection geocoding without a cross street (%s)' % self.case_number)
                 raise GeocodingError('Must have an intersection to geocode.')
 
             try:
-                location = '%s %s %s and %s %s' % (
-                    self.street_prefix,
+                location = '%s and %s' % (
                     self.street_name,
-                    self._normalize_suffix(self.street_suffix),
-                    self.cross_street_name,
-                    self._normalize_suffix(self.cross_street_suffix)
+                    self.cross_street_name
                 )
 
                 response = requests.post('%s?key=%s&inFormat=json' % (MAPQUEST_API, settings.MAPQUEST_API_KEY), json.dumps({
@@ -100,11 +97,11 @@ class ActiveCall(models.Model):
                 data = json.loads(response.content)        
                 result = data['results'][0]
 
-                if result['locations'][0]['geocodeQuality'] == 'INTERSECTION':
-                    log.info('Geocoded to %s, not intersection: "%s" (%s)' % (result['locations'][0]['geocodeQuality'], location, self.case_number))
+                if result['locations'][0]['geocodeQuality'] != 'INTERSECTION':
+                    log.info('Geocoded to %s, not INTERSECTION: "%s" (%s)' % (result['locations'][0]['geocodeQuality'], location, self.case_number))
                     raise GeocodingError('MapQuest failed to find an intersection matching this location.')
             except GeocodingError:
-                location = '%s %s %s %s Tyler, TX' % (
+                location = '%s %s %s %s' % (
                     self.street_number,
                     self.street_prefix,
                     self.street_name,
@@ -131,8 +128,8 @@ class ActiveCall(models.Model):
                 data = json.loads(response.content)        
                 result = data['results'][0]
 
-                if result['locations'][0]['geocodeQuality'] == 'STREET':
-                    log.info('Geocoded to %s, not street: "%s" (%s)' % (result['geocodeQuality'], location, self.case_number))
+                if result['locations'][0]['geocodeQuality'] not in ('ADDRESS', 'STREET'):
+                    log.info('Geocoded to %s, not ADDRESS or STREET: "%s" (%s)' % (result['locations'][0]['geocodeQuality'], location, self.case_number))
                     raise GeocodingError('MapQuest failed to find a street matching this location.')
 
             lat = result['locations'][0]['latLng']['lat']
