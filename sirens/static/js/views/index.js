@@ -29,7 +29,7 @@ Sirens.views.Index = Backbone.View.extend({
     },
 
     init_active_calls: function() {
-        this.active_calls = new Sirens.collections.ActiveCalls(Sirens.bootstrap.active_calls)
+        this.active_calls = new Sirens.collections.ActiveCalls(Sirens.bootstrap.active_calls);
     },
 
     init_map: function() {
@@ -232,5 +232,4 @@ Sirens.views.Index = Backbone.View.extend({
         e.data.view.map.setView(new L.LatLng(parseFloat(lat), parseFloat(lng)), zoom);
     }
 });
-
 

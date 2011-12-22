@@ -21,6 +21,6 @@ Sirens.routers.Index = Backbone.Router.extend({
 
     index: function() {
         this.navigate("");
-    },
+    }
 });
 

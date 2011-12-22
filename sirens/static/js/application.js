@@ -10,6 +10,5 @@ Sirens.routers = {};
 Sirens.templates = {};
 Sirens.bootstrap = {};
 
-Sirens.settings = {
-};
+Sirens.settings = {};
 
