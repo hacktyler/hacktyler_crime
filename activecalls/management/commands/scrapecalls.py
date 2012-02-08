@@ -17,7 +17,7 @@ import requests
 from activecalls.models import ActiveCall
 from activecalls.resources import ActiveCallResource
 
-ACTIVE_CALLS_URL = 'http://tylerpolice.com/acl/acl.aspx'
+ACTIVE_CALLS_URL = 'http://cityoftyler.org/acl/acl.aspx'
 
 class PagerRowError(Exception):
     """

@@ -17,7 +17,7 @@ class GeocodingError(Exception):
 class ActiveCall(models.Model):
     """
     An entry from Tyler's Active Call List:
-    http://tylerpolice.com/acl/acl.aspx
+    http://cityoftyler.org/acl/acl.aspx
     """
     case_number = models.TextField(unique=True)
     priority = models.TextField()
