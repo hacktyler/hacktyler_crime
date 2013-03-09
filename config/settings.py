@@ -173,7 +173,7 @@ LOGGING = {
 PUSHER_APP_ID = '11732'
 PUSHER_KEY = 'd20fddb74c58823cd05d'
 PUSHER_SECRET = None # must be in local_settings.py
-PUSHER_CHANNEL = 'presence-active-calls-test'
+PUSHER_CHANNEL = 'active-calls-test'
 
 # Mapquest
 MAPQUEST_API_KEY = None # must be in local_settings.py

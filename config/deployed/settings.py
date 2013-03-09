@@ -26,5 +26,5 @@ CACHES = {
 COMPRESS_ENABLED = True
 
 # Pusher
-PUSHER_CHANNEL = 'presence-active-calls'
+PUSHER_CHANNEL = 'active-calls'
 
