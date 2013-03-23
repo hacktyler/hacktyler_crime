@@ -54,7 +54,10 @@ class Command(BaseCommand):
 
             })
 
-        response = requests.get(ACTIVE_CALLS_URL, params=data)
+        if data:
+            response = requests.post(ACTIVE_CALLS_URL, data=data)
+        else:
+            response = requests.get(ACTIVE_CALLS_URL)
         
         # TODO - handle error status codes or empty body
         
